@@ -1,0 +1,3513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SPAN">
+    <meta name="theme-color" content="#070c18">
+    <title>SPAN — Structural Engineering & Bridge Physics</title>
+    <style>
+        :root {
+            --bg-dark: #060b16;
+            --panel-bg: rgba(13, 22, 40, 0.88);
+            --panel-border: rgba(148, 163, 184, 0.22);
+            --accent: #38bdf8;
+            --accent-strong: #0284c7;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gold: #fbbf24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: none;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* HUD Top Bar */
+        #hud-top {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(10px + var(--safe-top)) calc(14px + var(--safe-right)) 8px calc(14px + var(--safe-left));
+            pointer-events: none;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hud-group {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            pointer-events: auto;
+        }
+
+        .pill {
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--panel-border);
+            border-radius: 13px;
+            padding: 6px 11px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.38);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            min-height: 38px;
+            min-width: 38px;
+        }
+
+        .btn:hover {
+            background: rgba(30, 41, 59, 0.96);
+            border-color: rgba(255, 255, 255, 0.32);
+        }
+
+        .btn.active-toggle {
+            border-color: var(--accent);
+            background: rgba(14, 165, 233, 0.22);
+            color: #e0f2fe;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            opacity: 0.42;
+            pointer-events: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            border-color: #38bdf8;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+        }
+
+        .btn-go {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #34d399;
+            color: #fff;
+            padding: 8px 18px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 22px rgba(16, 185, 129, 0.38);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #f87171;
+            color: #fff;
+            padding: 8px 18px;
+            font-size: 14px;
+        }
+
+        .btn-help-circle {
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--accent);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .budget-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .budget-top {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .budget-val {
+            font-variant-numeric: tabular-nums;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--success);
+        }
+
+        .budget-val.over {
+            color: var(--danger);
+        }
+
+        .budget-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .budget-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--success);
+            border-radius: 999px;
+            transition: width 0.2s ease, background 0.2s ease;
+        }
+
+        /* Mission Briefing Strip & Live Stress Legend */
+        #sub-hud-bar {
+            position: relative;
+            z-index: 9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            padding: 0 12px;
+        }
+
+        #mission-briefing {
+            pointer-events: auto;
+            background: rgba(13, 22, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+            max-width: 94vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #stress-legend-bar {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(13, 22, 40, 0.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+            padding: 3px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+
+        .stress-gradient-strip {
+            width: 90px;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #10b981 0%, #facc15 40%, #f97316 72%, #ef4444 100%);
+        }
+
+        /* HUD Bottom Toolbar */
+        #hud-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 8px calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            pointer-events: auto;
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
+
+        .mat-btn {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid var(--panel-border);
+            color: var(--text-main);
+            border-radius: 14px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            min-width: 66px;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .mat-btn.active {
+            border-color: var(--accent);
+            background: rgba(14, 165, 233, 0.24);
+            transform: translateY(-3px);
+        }
+
+        .mat-swatch {
+            width: 28px;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+        }
+
+        .mat-name {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .mat-cost {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Toast Banner */
+        #toast {
+            position: absolute;
+            top: calc(104px + var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            z-index: 25;
+            background: rgba(13, 22, 40, 0.96);
+            border: 1px solid var(--accent);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modals */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(3, 7, 17, 0.84);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: calc(14px + var(--safe-top)) calc(14px + var(--safe-right)) calc(14px + var(--safe-bottom)) calc(14px + var(--safe-left));
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: linear-gradient(180deg, #101b33 0%, #091020 100%);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 22px;
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            touch-action: pan-y;
+        }
+
+        .modal-card * {
+            touch-action: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 11px;
+            background: rgba(56, 189, 248, 0.16);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .result-stars-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.38);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 22px;
+            line-height: 1;
+            letter-spacing: 3px;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.18);
+        }
+
+        .star-earned {
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.65);
+        }
+
+        .star-empty {
+            color: #475569;
+        }
+
+        .stress-pill {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stress-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+
+        /* Studio Hero Banner & 3-Step Onboarding Cards */
+        .hero-banner {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(56, 189, 248, 0.32);
+            background:
+                linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+                radial-gradient(circle at 50% 15%, #1d4ed8 0%, #0f172a 78%);
+            background-size: 22px 22px, 22px 22px, 100% 100%;
+            padding: 18px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+            box-shadow: inset 0 0 32px rgba(2, 6, 23, 0.65);
+        }
+
+        .guide-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .guide-card {
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 16px;
+            padding: 14px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+
+        .guide-step-pill {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.14);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .guide-card h4 {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .guide-card p {
+            font-size: 11.5px;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+
+        /* Clean Toggle Switch Row */
+        .intro-footer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 16px;
+            padding: 12px 14px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #334155;
+            border-radius: 999px;
+            transition: background 0.2s ease;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 2px;
+            top: 2px;
+            background: #f8fafc;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: #0ea5e9;
+            border-color: #38bdf8;
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+        /* Form & Inputs */
+        .input-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        /* Level Grid with Illustrated Thumbnails */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+            gap: 10px;
+        }
+
+        .level-card {
+            background: #162033;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.14s, border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .level-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+        }
+
+        .level-card.active {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.14);
+        }
+
+        .level-thumb {
+            width: 100%;
+            height: 68px;
+            background: #0b1324;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            display: block;
+        }
+
+        .level-card-body {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stars-row {
+            color: #fbbf24;
+            font-size: 13px;
+            letter-spacing: 2px;
+        }
+
+        /* Save Slots */
+        .slot-item {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slot-item.current {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .stat-box {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .stat-val {
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 640px) {
+            .pill { padding: 5px 8px; font-size: 11.5px; }
+            .btn { padding: 6px 9px; font-size: 12px; min-height: 36px; }
+            .mat-btn { min-width: 52px; padding: 5px 5px; }
+            .mat-name { font-size: 10px; }
+            .hide-mobile { display: none !important; }
+            .guide-steps { grid-template-columns: 1fr; }
+            .modal-card { padding: 16px; border-radius: 20px; }
+            .intro-footer-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Top HUD -->
+    <div id="hud-top">
+        <div class="hud-group">
+            <button class="btn" id="btnMenu" title="Levels & Save Slots" aria-label="Menu">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                <span class="hide-mobile">Levels</span>
+            </button>
+            <button class="btn btn-help-circle" id="btnHelp" title="How to Play / Start Screen" aria-label="How to Play">?</button>
+            <div class="pill" id="levelPill">
+                <span id="hudLevelTitle" style="color: var(--accent);">1. Creek Crossing</span>
+                <span id="hudPlayerBadge" class="badge hide-mobile">Engineer</span>
+            </div>
+        </div>
+
+        <div class="hud-group">
+            <div class="pill" title="Remaining Budget">
+                <div class="budget-wrap">
+                    <div class="budget-top">
+                        <span style="color:var(--text-muted); font-size:11px;">Budget:</span>
+                        <span id="hudBudget" class="budget-val">$5,500</span>
+                    </div>
+                    <div class="budget-bar-bg">
+                        <div class="budget-bar-fill" id="hudBudgetBar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pill stress-pill" title="Live & Peak Structural Stress">
+                <span class="stress-dot" id="hudStressDot"></span>
+                <span style="color:var(--text-muted);" class="hide-mobile">Load:</span>
+                <span id="hudLiveStress" style="font-weight:800; color:#10b981;">0%</span>
+                <span style="opacity:0.35;">|</span>
+                <span style="color:var(--text-muted); font-size:11px;">Max:</span>
+                <span id="hudPeakStress" style="font-weight:800;">0%</span>
+            </div>
+        </div>
+
+        <div class="hud-group">
+            <button class="btn" id="btnSpeedToggle" title="Simulation Speed" style="display:none; min-width:44px;">1x</button>
+            <button class="btn" id="btnMute" title="Toggle Audio" aria-label="Mute Toggle">
+                <svg id="iconSoundOn" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                <svg id="iconSoundOff" style="display:none; color:var(--danger);" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            </button>
+            <button class="btn btn-go" id="btnSimToggle">▶ GO</button>
+        </div>
+    </div>
+
+    <!-- Live Mission Briefing & Stress Legend -->
+    <div id="sub-hud-bar">
+        <div id="mission-briefing">
+            <span id="briefingTraffic">🚚 Convoy Ready</span>
+            <span style="opacity:0.4;">|</span>
+            <span id="briefingWind">🍃 Calm Wind</span>
+        </div>
+        <div id="stress-legend-bar">
+            <span style="color:#10b981;">Safe 0%</span>
+            <div class="stress-gradient-strip"></div>
+            <span style="color:#ef4444;">100% Snap</span>
+        </div>
+    </div>
+
+    <!-- Floating Toast -->
+    <div id="toast">Ready to engineer</div>
+
+    <!-- Bottom HUD (Build Tools & Materials) -->
+    <div id="hud-bottom">
+        <div class="toolbar-row" id="buildToolsRow">
+            <button class="btn" id="btnUndo" title="Undo (Z)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                <span>Undo</span>
+            </button>
+            <button class="btn" id="btnRedo" title="Redo (Y)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+                <span>Redo</span>
+            </button>
+            <button class="btn" id="btnTriangulate" title="Auto-Triangulate Support">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 21 19 3 19"/></svg>
+                <span>Assist</span>
+            </button>
+            <button class="btn" id="btnAutoDeck" title="Auto-Span Road Deck">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="6" y1="8" x2="6" y2="16"/><line x1="18" y1="8" x2="18" y2="16"/></svg>
+                <span>Deck</span>
+            </button>
+            <button class="btn" id="btnResetCam" title="Center Camera">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/></svg>
+            </button>
+            <button class="btn" id="btnClear" title="Clear Bridge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                <span>Clear</span>
+            </button>
+            <button class="btn active-toggle" id="btnStressToggle" title="Toggle Live Stress Colors">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <span>Stress</span>
+            </button>
+        </div>
+        <div class="toolbar-row" id="materialsRow">
+            <button class="mat-btn active" data-mat="road">
+                <div class="mat-swatch" style="background:#94a3b8;"></div>
+                <span class="mat-name">1. Road</span>
+                <span class="mat-cost">$200/m</span>
+            </button>
+            <button class="mat-btn" data-mat="wood">
+                <div class="mat-swatch" style="background:#d97706;"></div>
+                <span class="mat-name">2. Wood</span>
+                <span class="mat-cost">$110/m</span>
+            </button>
+            <button class="mat-btn" data-mat="steel">
+                <div class="mat-swatch" style="background:#38bdf8;"></div>
+                <span class="mat-name">3. Steel</span>
+                <span class="mat-cost">$320/m</span>
+            </button>
+            <button class="mat-btn" data-mat="cable">
+                <div class="mat-swatch" style="background:#facc15;"></div>
+                <span class="mat-name">4. Cable</span>
+                <span class="mat-cost">$140/m</span>
+            </button>
+            <button class="mat-btn" data-mat="piston">
+                <div class="mat-swatch" style="background:#a855f7;"></div>
+                <span class="mat-name">5. Piston</span>
+                <span class="mat-cost">$450/m</span>
+            </button>
+            <button class="mat-btn" data-mat="delete">
+                <div class="mat-swatch" style="background:#ef4444;"></div>
+                <span class="mat-name">Erase</span>
+                <span class="mat-cost">100% Ref</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Onboarding / Start Screen Modal -->
+    <div class="modal-backdrop" id="introModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span style="background:linear-gradient(135deg,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">SPAN</span>
+                    <span class="badge" id="introVersionBadge">v1.5.0</span>
+                </div>
+                <button class="btn" id="btnCloseIntro" title="Close Intro">✕</button>
+            </div>
+
+            <div class="hero-banner">
+                <!-- Animated Suspension Bridge Hero SVG -->
+                <svg width="100%" height="114" viewBox="0 0 420 114" style="max-width:410px;">
+                    <defs>
+                        <linearGradient id="heroCable" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#38bdf8"/>
+                            <stop offset="50%" stop-color="#facc15"/>
+                            <stop offset="100%" stop-color="#38bdf8"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Towers -->
+                    <rect x="95" y="18" width="10" height="74" rx="2" fill="#38bdf8"/>
+                    <rect x="315" y="18" width="10" height="74" rx="2" fill="#38bdf8"/>
+                    <!-- Main Suspension Cables -->
+                    <path d="M 10 84 Q 55 68 100 22 Q 210 92 320 22 Q 365 68 410 84" fill="none" stroke="url(#heroCable)" stroke-width="3.5"/>
+                    <!-- Vertical Suspenders -->
+                    <line x1="140" y1="53" x2="140" y2="84" stroke="#94a3b8" stroke-width="1.5"/>
+                    <line x1="175" y1="68" x2="175" y2="84" stroke="#94a3b8" stroke-width="1.5"/>
+                    <line x1="210" y1="74" x2="210" y2="84" stroke="#94a3b8" stroke-width="1.5"/>
+                    <line x1="245" y1="68" x2="245" y2="84" stroke="#94a3b8" stroke-width="1.5"/>
+                    <line x1="280" y1="53" x2="280" y2="84" stroke="#94a3b8" stroke-width="1.5"/>
+                    <!-- Road Deck -->
+                    <line x1="8" y1="84" x2="412" y2="84" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Moving EV Graphic -->
+                    <g>
+                        <rect x="186" y="69" width="38" height="12" rx="4" fill="#10b981"/>
+                        <circle cx="195" cy="82" r="4" fill="#0f172a" stroke="#cbd5e1" stroke-width="1.5"/>
+                        <circle cx="215" cy="82" r="4" fill="#0f172a" stroke="#cbd5e1" stroke-width="1.5"/>
+                        <animateTransform attributeName="transform" type="translate" from="-140 0" to="160 0" dur="4.2s" repeatCount="indefinite"/>
+                    </g>
+                    <!-- Water Ripples -->
+                    <path d="M 30 102 Q 120 98 210 102 T 390 102" fill="none" stroke="#38bdf8" stroke-opacity="0.6" stroke-width="2.5"/>
+                </svg>
+                <div style="font-size:18px; font-weight:900; color:#fff; letter-spacing:-0.3px;">Engineer Bridges That Defy Gravity</div>
+                <div style="font-size:12.5px; color:#cbd5e1; max-width:460px; line-height:1.45;">
+                    Check the vehicles waiting on the bank, build a sturdy bridge within budget, and press <strong>GO</strong> to watch real-time structural forces in action!
+                </div>
+            </div>
+
+            <div class="guide-steps">
+                <div class="guide-card">
+                    <span class="guide-step-pill">Step 1</span>
+                    <svg width="42" height="42" viewBox="0 0 42 42">
+                        <circle cx="10" cy="30" r="5.5" fill="#ef4444"/>
+                        <circle cx="32" cy="14" r="5.5" fill="#38bdf8"/>
+                        <line x1="10" y1="30" x2="32" y2="14" stroke="#f8fafc" stroke-width="3" stroke-dasharray="4 3"/>
+                    </svg>
+                    <h4>Drag &amp; Snap</h4>
+                    <p>Drag from any red anchor or white joint to build Road Decks, Wood, Steel, or Cables.</p>
+                </div>
+
+                <div class="guide-card">
+                    <span class="guide-step-pill">Step 2</span>
+                    <svg width="42" height="42" viewBox="0 0 42 42">
+                        <polygon points="8,32 21,10 34,32" fill="rgba(16,185,129,0.14)" stroke="#10b981" stroke-width="3" stroke-linejoin="round"/>
+                        <circle cx="8" cy="32" r="3.5" fill="#fff"/>
+                        <circle cx="21" cy="10" r="3.5" fill="#fff"/>
+                        <circle cx="34" cy="32" r="3.5" fill="#fff"/>
+                    </svg>
+                    <h4>Triangulate</h4>
+                    <p>Triangles lock joints in place! Beams shift from green to yellow, orange, and red under load.</p>
+                </div>
+
+                <div class="guide-card">
+                    <span class="guide-step-pill">Step 3</span>
+                    <svg width="42" height="42" viewBox="0 0 42 42">
+                        <polygon points="13,10 33,21 13,32" fill="#10b981"/>
+                        <circle cx="31" cy="11" r="4.5" fill="#fbbf24"/>
+                    </svg>
+                    <h4>Hit GO &amp; Win</h4>
+                    <p>Press <strong>GO</strong> to launch vehicles across the gap, collect bonus stars, and earn 3 gold stars.</p>
+                </div>
+            </div>
+
+            <div class="intro-footer-bar">
+                <label class="toggle-label" for="chkShowIntroEveryTime">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="chkShowIntroEveryTime" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                    <span>Show this intro screen every time</span>
+                </label>
+
+                <button class="btn btn-primary" id="btnStartFromIntro" style="padding:10px 22px; font-size:14px;">
+                    Start Engineering ▶
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Menu / Campaign / Profile Modal -->
+    <div class="modal-backdrop" id="menuModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span style="color:var(--accent);">SPAN</span>
+                    <span class="badge" id="menuVersionBadge">v1.5.0</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn" id="btnOpenGuideFromMenu" title="Open Start Screen" style="font-size:12px; padding:5px 10px;">
+                        <span>? Intro</span>
+                    </button>
+                    <button class="btn" id="btnCheckUpdate" title="Check for App Update" style="font-size:11px; padding:5px 9px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        <span>Update</span>
+                    </button>
+                    <button class="btn" id="btnCloseMenu">✕</button>
+                </div>
+            </div>
+
+            <!-- Player Identity & Mode Selector -->
+            <div style="background:#1e293b; padding:12px; border-radius:14px; display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted);">ACTIVE ENGINEER PROFILE</span>
+                    <span id="nameConfirmStatus" style="font-size:11px; color:var(--success); font-weight:700;">✓ Saved</span>
+                </div>
+                <div class="input-row">
+                    <input type="text" id="playerNameInput" maxlength="18" placeholder="Enter Player 1 Name...">
+                    <button class="btn btn-primary" id="btnConfirmName">Confirm</button>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button class="btn" id="btnModeSingle" style="flex:1; border-color:var(--accent);">👤 Single Player</button>
+                    <button class="btn" id="btnModeMulti" style="flex:1;">👥 2P Pass &amp; Play</button>
+                </div>
+                <div id="player2Row" class="input-row" style="display:none;">
+                    <input type="text" id="player2NameInput" maxlength="18" placeholder="Enter Player 2 Name...">
+                    <button class="btn btn-primary" id="btnConfirmP2">Confirm P2</button>
+                </div>
+            </div>
+
+            <!-- Game Modes & Levels -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px; font-weight:800;">CAMPAIGN LEVELS (6)</span>
+                <button class="btn btn-primary" id="btnStartEndless" style="padding:6px 12px; font-size:12px;">∞ Endless Canyon</button>
+            </div>
+            <div class="level-grid" id="levelGrid"></div>
+
+            <!-- Save Slots Management -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                <span style="font-size:13px; font-weight:800;">SAVE SLOTS &amp; PROGRESS</span>
+                <button class="btn" id="btnNewSaveSlot" style="padding:5px 10px; font-size:12px;">+ New Game Slot</button>
+            </div>
+            <div id="saveSlotsList" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+    </div>
+
+    <!-- Victory / Summary Modal -->
+    <div class="modal-backdrop" id="resultModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="resultTitle">Span Complete!</div>
+                <div class="result-stars-display" id="resultStars" aria-label="Earned Stars">
+                    <span class="star-earned">★</span><span class="star-earned">★</span><span class="star-earned">★</span>
+                </div>
+            </div>
+            <p id="resultSubtitle" style="font-size:13px; color:var(--text-muted);"></p>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-label">BUDGET USED</div>
+                    <div class="stat-val" id="resBudget">$0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">PEAK STRESS</div>
+                    <div class="stat-val" id="resStress">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">SCORE</div>
+                    <div class="stat-val" id="resScore" style="color:var(--accent);">0</div>
+                </div>
+            </div>
+            <div id="multiplayerComparison" style="display:none; background:#1e293b; padding:12px; border-radius:12px; font-size:13px;"></div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                <button class="btn" id="btnResultBuild">✎ Edit Bridge</button>
+                <button class="btn btn-primary" id="btnResultNext">Next Level ▶</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    "use strict";
+
+    /**
+     * =========================================================================
+     * 1. APP VERSIONING, PWA ICON INJECTION & SELF-UPDATE SYSTEM
+     * =========================================================================
+     */
+    const APP_VERSION = "v1.5.0";
+    const STORAGE_KEY = "SPAN_SAVE_DATA_V1";
+
+    document.getElementById("introVersionBadge").textContent = APP_VERSION;
+    document.getElementById("menuVersionBadge").textContent = APP_VERSION;
+
+    // Generate high-res PNG app icon via offscreen Canvas and inject into DOM
+    function injectAppIcons() {
+        try {
+            const c = document.createElement("canvas");
+            c.width = 512;
+            c.height = 512;
+            const ctx = c.getContext("2d");
+
+            const grad = ctx.createLinearGradient(0, 0, 512, 512);
+            grad.addColorStop(0, "#0f172a");
+            grad.addColorStop(1, "#020617");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 512);
+
+            ctx.strokeStyle = "rgba(56, 189, 248, 0.14)";
+            ctx.lineWidth = 2;
+            for (let i = 64; i < 512; i += 64) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+            }
+
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 14;
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(44, 340);
+            ctx.quadraticCurveTo(256, 130, 468, 340);
+            ctx.stroke();
+
+            ctx.strokeStyle = "#f8fafc";
+            ctx.lineWidth = 16;
+            ctx.beginPath();
+            ctx.moveTo(36, 340);
+            ctx.lineTo(476, 340);
+            ctx.stroke();
+
+            ctx.strokeStyle = "#facc15";
+            ctx.lineWidth = 6;
+            [120, 188, 256, 324, 392].forEach(x => {
+                const t = (x - 44) / (468 - 44);
+                const archY = (1 - t) * (1 - t) * 340 + 2 * (1 - t) * t * 130 + t * t * 340;
+                ctx.beginPath();
+                ctx.moveTo(x, archY + 6);
+                ctx.lineTo(x, 332);
+                ctx.stroke();
+            });
+
+            ctx.fillStyle = "#f8fafc";
+            ctx.font = "900 74px -apple-system, BlinkMacSystemFont, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("SPAN", 256, 445);
+
+            const dataUrl = c.toDataURL("image/png");
+
+            const appleIcon = document.createElement("link");
+            appleIcon.rel = "apple-touch-icon";
+            appleIcon.href = dataUrl;
+            document.head.appendChild(appleIcon);
+
+            const favIcon = document.createElement("link");
+            favIcon.rel = "icon";
+            favIcon.type = "image/png";
+            favIcon.href = dataUrl;
+            document.head.appendChild(favIcon);
+        } catch (e) {
+            console.warn("Icon generation skipped:", e);
+        }
+    }
+    injectAppIcons();
+
+    async function checkForUpdates(manual = false) {
+        try {
+            if (window.location.protocol === "file:" || window.location.protocol === "about:" || window.location.protocol === "blob:") {
+                if (manual) showToast(`Running standalone (${APP_VERSION})`);
+                return;
+            }
+            const url = `${window.location.pathname}?t=${Date.now()}`;
+            const res = await fetch(url, { cache: "no-store" });
+            if (!res.ok) return;
+            const html = await res.text();
+            const match = html.match(/const\s+APP_VERSION\s*=\s*"([^"]+)"/);
+            if (match && match[1] && match[1] !== APP_VERSION) {
+                showToast(`Updating to ${match[1]}...`);
+                if ("caches" in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                setTimeout(() => {
+                    window.location.replace(`${window.location.pathname}?v=${encodeURIComponent(match[1])}&t=${Date.now()}`);
+                }, 900);
+            } else if (manual) {
+                showToast(`You are on the latest version (${APP_VERSION})`);
+            }
+        } catch (err) {
+            if (manual) showToast(`Version ${APP_VERSION} active`);
+        }
+    }
+
+    /**
+     * =========================================================================
+     * 2. PROCEDURAL WEB AUDIO ENGINE (iOS UNLOCK SAFE)
+     * =========================================================================
+     */
+    class SoundEngine {
+        constructor() {
+            this.ctx = null;
+            this.muted = false;
+            this.engineOsc = null;
+            this.engineGain = null;
+        }
+
+        unlock() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === "suspended") {
+                this.ctx.resume().catch(() => {});
+            }
+        }
+
+        toggleMute() {
+            this.muted = !this.muted;
+            this.applyMuteUI();
+            if (typeof saveRoot !== "undefined" && saveRoot.settings) {
+                saveRoot.settings.muted = this.muted;
+                persistSaveData();
+            }
+            return this.muted;
+        }
+
+        applyMuteUI() {
+            document.getElementById("iconSoundOn").style.display = this.muted ? "none" : "block";
+            document.getElementById("iconSoundOff").style.display = this.muted ? "block" : "none";
+            if (this.muted) this.stopEngine();
+        }
+
+        playClick(pitch = 520) {
+            if (this.muted) return;
+            this.unlock();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(pitch, now);
+            osc.frequency.exponentialRampToValueAtTime(pitch * 1.4, now + 0.06);
+            gain.gain.setValueAtTime(0.14, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+            osc.connect(gain).connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.075);
+        }
+
+        playSnap(isSteel = false) {
+            if (this.muted) return;
+            this.unlock();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const bufferSize = this.ctx.sampleRate * 0.28;
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.07));
+            }
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = "bandpass";
+            filter.frequency.value = isSteel ? 1400 : 480;
+
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+            noise.connect(filter).connect(gain).connect(this.ctx.destination);
+            noise.start(now);
+        }
+
+        playStar() {
+            if (this.muted) return;
+            this.unlock();
+            if (!this.ctx) return;
+            const notes = [587.33, 880, 1174.66];
+            notes.forEach((freq, idx) => {
+                const now = this.ctx.currentTime + idx * 0.06;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain).connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.26);
+            });
+        }
+
+        playWin() {
+            if (this.muted) return;
+            this.unlock();
+            if (!this.ctx) return;
+            const chord = [523.25, 659.25, 783.99, 1046.50];
+            chord.forEach((freq, i) => {
+                const now = this.ctx.currentTime + i * 0.08;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.16, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                osc.connect(gain).connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.46);
+            });
+        }
+
+        updateEngine(speedRatio) {
+            if (this.muted || !this.ctx) return;
+            if (!this.engineOsc) {
+                this.engineOsc = this.ctx.createOscillator();
+                this.engineGain = this.ctx.createGain();
+                this.engineOsc.type = "sawtooth";
+                this.engineOsc.frequency.value = 55;
+                this.engineGain.gain.value = 0.032;
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.value = 260;
+                this.engineOsc.connect(filter).connect(this.engineGain).connect(this.ctx.destination);
+                this.engineOsc.start();
+            }
+            const targetFreq = 48 + Math.min(1.5, Math.abs(speedRatio)) * 65;
+            this.engineOsc.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.05);
+        }
+
+        stopEngine() {
+            if (this.engineOsc) {
+                try { this.engineOsc.stop(); this.engineOsc.disconnect(); } catch (e) {}
+                this.engineOsc = null;
+                this.engineGain = null;
+            }
+        }
+    }
+    const audio = new SoundEngine();
+
+    /**
+     * =========================================================================
+     * 3. MATERIALS, CAMPAIGN LEVELS (WITH SVG THUMBNAILS) & SAVE SLOTS
+     * =========================================================================
+     */
+    const MATERIALS = {
+        road:   { name: "Road Deck",    costPerM: 200, maxLength: 3.4, strength: 1380, stiffness: 0.95, color: "#94a3b8", width: 8, isRoad: true,  compression: true },
+        wood:   { name: "Wood Beam",    costPerM: 110, maxLength: 3.6, strength: 940,  stiffness: 0.86, color: "#d97706", width: 5, isRoad: false, compression: true },
+        steel:  { name: "Steel Truss",  costPerM: 320, maxLength: 4.8, strength: 2500, stiffness: 0.99, color: "#38bdf8", width: 6, isRoad: false, compression: true },
+        cable:  { name: "Steel Cable",  costPerM: 140, maxLength: 7.5, strength: 2150, stiffness: 0.96, color: "#facc15", width: 3, isRoad: false, compression: false },
+        piston: { name: "Hydraulic",    costPerM: 450, maxLength: 4.5, strength: 2000, stiffness: 0.96, color: "#a855f7", width: 7, isRoad: false, compression: true, isPiston: true }
+    };
+
+    const CAMPAIGN_LEVELS = [
+        {
+            id: 0,
+            title: "1. Creek Crossing",
+            subtitle: "Connect the left bank to the right bank with Road Deck and support triangles.",
+            budget: 5500,
+            spanMeters: 10,
+            leftAnchors: [{ x: -5, y: 0 }, { x: -5, y: 2 }],
+            rightAnchors: [{ x: 5, y: 0 }, { x: 5, y: 2 }],
+            waterY: 3.8,
+            wind: 0,
+            stars: [{ x: 0, y: -0.6 }],
+            vehicles: [
+                { type: "ev", label: "EV Sedan (1.0t)", dir: 1, delay: 0.2, mass: 1.0, speed: 4.4, color: "#38bdf8", width: 1.9, height: 0.85 }
+            ],
+            boat: null,
+            thumbSvg: `<svg class="level-thumb" viewBox="0 0 180 68"><rect width="180" height="68" fill="#0b1426"/><rect y="50" width="180" height="18" fill="#0369a1"/><polygon points="0,34 45,34 40,68 0,68" fill="#1e293b"/><polygon points="135,34 180,34 180,68 140,68" fill="#1e293b"/><line x1="45" y1="34" x2="135" y2="34" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5 3"/><polygon points="45,34 90,50 135,34" fill="none" stroke="#d97706" stroke-width="2"/><rect x="14" y="25" width="18" height="8" rx="2" fill="#38bdf8"/></svg>`
+        },
+        {
+            id: 1,
+            title: "2. Timber Gorge",
+            subtitle: "A wider gap with an EV and a Heavy Logging Truck staged on the left bank.",
+            budget: 8800,
+            spanMeters: 14,
+            leftAnchors: [{ x: -7, y: 0 }, { x: -7, y: 2.5 }, { x: -8.5, y: -2.5 }],
+            rightAnchors: [{ x: 7, y: 0 }, { x: 7, y: 2.5 }, { x: 8.5, y: -2.5 }],
+            waterY: 4.8,
+            wind: 0,
+            stars: [{ x: -2.5, y: -0.6 }, { x: 2.5, y: -0.6 }, { x: 0, y: -2.6 }],
+            vehicles: [
+                { type: "ev", label: "EV (1.0t)", dir: 1, delay: 0.2, mass: 1.0, speed: 4.6, color: "#10b981", width: 1.9, height: 0.85 },
+                { type: "truck", label: "Timber Truck (2.1t)", dir: 1, delay: 2.8, mass: 2.1, speed: 3.7, color: "#f59e0b", width: 2.7, height: 1.25 }
+            ],
+            boat: null,
+            thumbSvg: `<svg class="level-thumb" viewBox="0 0 180 68"><rect width="180" height="68" fill="#0b1426"/><rect y="54" width="180" height="14" fill="#0369a1"/><polygon points="0,36 38,36 32,68 0,68" fill="#1e293b"/><polygon points="142,36 180,36 180,68 148,68" fill="#1e293b"/><path d="M 38 36 Q 90 14 142 36" fill="none" stroke="#facc15" stroke-width="2"/><line x1="38" y1="36" x2="142" y2="36" stroke="#94a3b8" stroke-width="3"/><rect x="4" y="25" width="16" height="10" rx="2" fill="#f59e0b"/><rect x="22" y="28" width="12" height="7" rx="2" fill="#10b981"/></svg>`
+        },
+        {
+            id: 2,
+            title: "3. Harbor Drawbridge",
+            subtitle: "A cargo vessel passes through! Use Hydraulic Pistons or build a high arch.",
+            budget: 11500,
+            spanMeters: 14,
+            leftAnchors: [{ x: -7, y: 0 }, { x: -7, y: 2.2 }],
+            rightAnchors: [{ x: 7, y: 0 }, { x: 7, y: 2.2 }],
+            waterY: 3.2,
+            wind: 0,
+            stars: [{ x: 0, y: -2.2 }, { x: 3.5, y: -0.6 }],
+            vehicles: [
+                { type: "ev", label: "Harbor EV (1.1t)", dir: 1, delay: 5.8, mass: 1.1, speed: 4.8, color: "#a855f7", width: 1.9, height: 0.85 }
+            ],
+            boat: { startX: -12, endX: 12, y: 3.2, mastTopY: 0.6, speed: 3.4, delay: 0.4 },
+            thumbSvg: `<svg class="level-thumb" viewBox="0 0 180 68"><rect width="180" height="68" fill="#0b1426"/><rect y="46" width="180" height="22" fill="#0284c7"/><polygon points="0,32 36,32 32,68 0,68" fill="#1e293b"/><polygon points="144,32 180,32 180,68 148,68" fill="#1e293b"/><line x1="36" y1="32" x2="72" y2="16" stroke="#a855f7" stroke-width="3"/><line x1="144" y1="32" x2="108" y2="16" stroke="#a855f7" stroke-width="3"/><polygon points="78,46 102,46 98,52 82,52" fill="#ef4444"/><line x1="90" y1="46" x2="90" y2="26" stroke="#f8fafc" stroke-width="2"/></svg>`
+        },
+        {
+            id: 3,
+            title: "4. Twin Canyon Rush",
+            subtitle: "Vehicles approach from both banks in gusty crosswinds!",
+            budget: 14500,
+            spanMeters: 16,
+            leftAnchors: [{ x: -8, y: 0 }, { x: -8, y: 2.5 }, { x: -8, y: -3.2 }],
+            rightAnchors: [{ x: 8, y: 0 }, { x: 8, y: 2.5 }, { x: 8, y: -3.2 }],
+            waterY: 5.2,
+            wind: 0.45,
+            stars: [{ x: -3, y: -0.6 }, { x: 0, y: -0.6 }, { x: 3, y: -0.6 }],
+            vehicles: [
+                { type: "truck", label: "Freight (2.0t)", dir: 1, delay: 0.3, mass: 2.0, speed: 3.9, color: "#ef4444", width: 2.7, height: 1.25 },
+                { type: "monster", label: "Crusher (1.8t)", dir: -1, delay: 0.9, mass: 1.8, speed: 4.5, color: "#ec4899", width: 2.3, height: 1.35 }
+            ],
+            boat: null,
+            thumbSvg: `<svg class="level-thumb" viewBox="0 0 180 68"><rect width="180" height="68" fill="#0b1426"/><rect y="54" width="180" height="14" fill="#0369a1"/><polygon points="0,36 32,36 28,68 0,68" fill="#1e293b"/><polygon points="148,36 180,36 180,68 152,68" fill="#1e293b"/><line x1="32" y1="36" x2="148" y2="36" stroke="#38bdf8" stroke-width="3"/><rect x="8" y="25" width="18" height="10" rx="2" fill="#ef4444"/><rect x="154" y="24" width="16" height="11" rx="2" fill="#ec4899"/></svg>`
+        },
+        {
+            id: 4,
+            title: "5. Stunt Chasm",
+            subtitle: "Launch the Monster Truck across a ramp to snag high-altitude stars!",
+            budget: 13000,
+            spanMeters: 16,
+            leftAnchors: [{ x: -8, y: 0.5 }, { x: -8, y: 2.8 }],
+            rightAnchors: [{ x: 8, y: -0.5 }, { x: 8, y: 2.2 }],
+            waterY: 5.5,
+            wind: 0.2,
+            stars: [{ x: -1.5, y: -1.8 }, { x: 1.5, y: -2.4 }, { x: 4.5, y: -1.5 }],
+            vehicles: [
+                { type: "monster", label: "Stunt 4x4 (1.9t)", dir: 1, delay: 0.3, mass: 1.9, speed: 6.4, color: "#38bdf8", width: 2.4, height: 1.35 }
+            ],
+            boat: null,
+            thumbSvg: `<svg class="level-thumb" viewBox="0 0 180 68"><rect width="180" height="68" fill="#0b1426"/><rect y="56" width="180" height="12" fill="#0369a1"/><polygon points="0,40 34,40 30,68 0,68" fill="#1e293b"/><polygon points="146,32 180,32 180,68 150,68" fill="#1e293b"/><path d="M 34 40 Q 70 28 92 22" fill="none" stroke="#94a3b8" stroke-width="3"/><circle cx="112" cy="16" r="3" fill="#fbbf24"/><circle cx="130" cy="20" r="3" fill="#fbbf24"/></svg>`
+        },
+        {
+            id: 5,
+            title: "6. Golden Gate Finale",
+            subtitle: "Grand suspension span! Support an Articulated Tour Bus and Heavy Freight in high wind.",
+            budget: 18500,
+            spanMeters: 20,
+            leftAnchors: [{ x: -10, y: 0 }, { x: -10, y: 2.8 }, { x: -10, y: -4.2 }],
+            rightAnchors: [{ x: 10, y: 0 }, { x: 10, y: 2.8 }, { x: 10, y: -4.2 }],
+            waterY: 5.8,
+            wind: 0.55,
+            stars: [{ x: -4, y: -0.6 }, { x: 0, y: -0.6 }, { x: 4, y: -0.6 }],
+            vehicles: [
+                { type: "bus", label: "Tour Bus (2.2t)", dir: 1, delay: 0.3, mass: 2.2, speed: 4.3, color: "#facc15", width: 3.3, height: 1.2 },
+                { type: "truck", label: "Heavy Rig (2.6t)", dir: 1, delay: 3.4, mass: 2.6, speed: 3.7, color: "#ef4444", width: 2.8, height: 1.3 }
+            ],
+            boat: null,
+            thumbSvg: `<svg class="level-thumb" viewBox="0 0 180 68"><rect width="180" height="68" fill="#0b1426"/><rect y="56" width="180" height="12" fill="#0369a1"/><rect x="30" y="10" width="4" height="32" fill="#ef4444"/><rect x="146" y="10" width="4" height="32" fill="#ef4444"/><path d="M 32 12 Q 90 42 148 12" fill="none" stroke="#facc15" stroke-width="2"/><line x1="26" y1="40" x2="154" y2="40" stroke="#94a3b8" stroke-width="3"/><rect x="4" y="30" width="20" height="9" rx="2" fill="#facc15"/></svg>`
+        }
+    ];
+
+    function createDefaultSlot(name = "Chief Engineer") {
+        return {
+            id: "slot_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+            playerName: name,
+            player2Name: "Co-Engineer",
+            multiplayer: false,
+            seenIntro: false,
+            updatedAt: Date.now(),
+            currentLevelIdx: 0,
+            endlessWave: 1,
+            endlessCash: 9000,
+            levelProgress: {},
+            endlessBlueprint: null
+        };
+    }
+
+    let saveRoot = {
+        version: APP_VERSION,
+        activeSlotId: null,
+        settings: {
+            showIntroEveryTime: true,
+            muted: false,
+            showStress: true,
+            simSpeed: 1,
+            selectedMaterial: "road"
+        },
+        slots: []
+    };
+
+    function loadSaveData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.slots) && parsed.slots.length > 0) {
+                    saveRoot = parsed;
+                    saveRoot.version = APP_VERSION;
+                    saveRoot.settings = {
+                        showIntroEveryTime: true,
+                        muted: false,
+                        showStress: true,
+                        simSpeed: 1,
+                        selectedMaterial: "road",
+                        ...(parsed.settings || {})
+                    };
+                    if (!saveRoot.slots.find(s => s.id === saveRoot.activeSlotId)) {
+                        saveRoot.activeSlotId = saveRoot.slots[0].id;
+                    }
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("Save load fallback:", e);
+        }
+        const initial = createDefaultSlot("Chief Engineer");
+        saveRoot = {
+            version: APP_VERSION,
+            activeSlotId: initial.id,
+            settings: {
+                showIntroEveryTime: true,
+                muted: false,
+                showStress: true,
+                simSpeed: 1,
+                selectedMaterial: "road"
+            },
+            slots: [initial]
+        };
+        persistSaveData();
+    }
+
+    function applySavedUserSettings() {
+        const s = saveRoot.settings || {};
+        audio.muted = !!s.muted;
+        audio.applyMuteUI();
+
+        state.showStress = s.showStress !== undefined ? !!s.showStress : true;
+        const stressBtn = document.getElementById("btnStressToggle");
+        if (stressBtn) stressBtn.classList.toggle("active-toggle", state.showStress);
+
+        state.simSpeed = s.simSpeed === 2 ? 2 : 1;
+
+        if (s.selectedMaterial && (MATERIALS[s.selectedMaterial] || s.selectedMaterial === "delete")) {
+            state.selectedMaterial = s.selectedMaterial;
+            document.querySelectorAll(".mat-btn").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.mat === state.selectedMaterial);
+            });
+        }
+
+        const chkIntro = document.getElementById("chkShowIntroEveryTime");
+        if (chkIntro) {
+            chkIntro.checked = s.showIntroEveryTime !== false;
+        }
+    }
+
+    function persistSaveData() {
+        try {
+            const slot = getActiveSlot();
+            if (slot) slot.updatedAt = Date.now();
+            saveRoot.version = APP_VERSION;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(saveRoot));
+        } catch (e) {
+            console.warn("Save failed:", e);
+        }
+    }
+
+    function getActiveSlot() {
+        return saveRoot.slots.find(s => s.id === saveRoot.activeSlotId) || saveRoot.slots[0];
+    }
+
+    /**
+     * =========================================================================
+     * 4. GAME STATE & DETERMINISTIC VERLET PHYSICS ENGINE
+     * =========================================================================
+     */
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const state = {
+        mode: "BUILD", // "BUILD" | "SIM" | "FAIL_SLOWMO" | "WIN"
+        gameType: "CAMPAIGN", // "CAMPAIGN" | "ENDLESS"
+        simSpeed: 1, // 1 or 2
+        activeTurn: 1,
+        p1TurnResult: null,
+        selectedMaterial: "road",
+        showStress: true,
+        nodes: [],
+        beams: [],
+        undoStack: [],
+        redoStack: [],
+        vehicles: [],
+        stars: [],
+        boat: null,
+        particles: [],
+        simTime: 0,
+        slowMoTimer: 0,
+        failPoint: null,
+        liveStress: 0,
+        peakStress: 0,
+        cam: { x: 0, y: 0.4, scale: 36 },
+        pointer: {
+            active: false,
+            isTouch: false,
+            screenX: 0,
+            screenY: 0,
+            worldX: 0,
+            worldY: 0,
+            dragStartNode: null,
+            snapNode: null,
+            panning: false,
+            lastPanX: 0,
+            lastPanY: 0,
+            pinching: false,
+            lastPinchDist: 0,
+            lastPinchMidX: 0,
+            lastPinchMidY: 0
+        },
+        currentLevel: null
+    };
+
+    function getLevelData() {
+        const slot = getActiveSlot();
+        if (state.gameType === "ENDLESS") {
+            const wave = slot.endlessWave || 1;
+            const halfSpan = Math.min(13, 5 + Math.floor(wave * 0.8));
+            const vType = wave % 4 === 0 ? "bus" : (wave % 3 === 0 ? "monster" : (wave % 2 === 0 ? "truck" : "ev"));
+            const vMass = +(1.0 + wave * 0.32).toFixed(1);
+            return {
+                id: "endless",
+                title: `Endless Wave ${wave}`,
+                subtitle: "Survive the widening canyon! Repair & reinforce between waves.",
+                budget: slot.endlessCash || 9000,
+                spanMeters: halfSpan * 2,
+                leftAnchors: [{ x: -halfSpan, y: 0 }, { x: -halfSpan, y: 2.4 }, { x: -halfSpan - 1.5, y: -2.6 }],
+                rightAnchors: [{ x: halfSpan, y: 0 }, { x: halfSpan, y: 2.4 }, { x: halfSpan + 1.5, y: -2.6 }],
+                waterY: 5.0,
+                wind: Math.min(0.8, (wave - 1) * 0.12),
+                stars: [{ x: 0, y: -1.4 }],
+                vehicles: [
+                    {
+                        type: vType,
+                        label: `Wave ${wave} ${vType.toUpperCase()} (${vMass}t)`,
+                        dir: 1,
+                        delay: 0.2,
+                        mass: vMass,
+                        speed: 4.0 + Math.min(2.5, wave * 0.2),
+                        color: "#38bdf8",
+                        width: vType === "bus" ? 3.2 : 2.3,
+                        height: 1.15
+                    }
+                ],
+                boat: null
+            };
+        }
+        return CAMPAIGN_LEVELS[slot.currentLevelIdx] || CAMPAIGN_LEVELS[0];
+    }
+
+    function initLevel(preserveBlueprint = false) {
+        state.mode = "BUILD";
+        state.simTime = 0;
+        state.slowMoTimer = 0;
+        state.failPoint = null;
+        state.liveStress = 0;
+        state.peakStress = 0;
+        state.particles = [];
+        audio.stopEngine();
+
+        const lvl = getLevelData();
+        state.currentLevel = lvl;
+        const slot = getActiveSlot();
+
+        let savedBp = null;
+        if (preserveBlueprint && state.nodes.length > 0) {
+            savedBp = serializeBlueprint();
+        } else if (state.gameType === "ENDLESS" && slot.endlessBlueprint) {
+            savedBp = slot.endlessBlueprint;
+        } else if (state.gameType === "CAMPAIGN" && slot.levelProgress[lvl.id]?.blueprint) {
+            savedBp = slot.levelProgress[lvl.id].blueprint;
+        }
+
+        state.nodes = [];
+        state.beams = [];
+
+        lvl.leftAnchors.forEach((a, idx) => {
+            state.nodes.push({
+                id: "L" + idx, x: a.x, y: a.y, oldX: a.x, oldY: a.y,
+                baseX: a.x, baseY: a.y, fixed: true, isRoadAnchor: idx === 0
+            });
+        });
+        lvl.rightAnchors.forEach((a, idx) => {
+            state.nodes.push({
+                id: "R" + idx, x: a.x, y: a.y, oldX: a.x, oldY: a.y,
+                baseX: a.x, baseY: a.y, fixed: true, isRoadAnchor: idx === 0
+            });
+        });
+
+        if (savedBp && savedBp.nodes && savedBp.beams) {
+            restoreBlueprint(savedBp, false);
+        }
+
+        state.undoStack = [JSON.stringify(serializeBlueprint())];
+        state.redoStack = [];
+        resetDynamicEntities();
+        fitCameraToLevel();
+        updateHUD();
+    }
+
+    function resetDynamicEntities() {
+        const lvl = state.currentLevel;
+        const halfSpan = lvl.spanMeters / 2;
+        state.stars = lvl.stars.map(s => ({ x: s.x, y: s.y, collected: false, pulse: 0 }));
+        state.boat = lvl.boat ? { ...lvl.boat, x: lvl.boat.startX, active: false } : null;
+
+        let leftQueueOffset = 1.65;
+        let rightQueueOffset = 1.65;
+        const leftBankY = lvl.leftAnchors[0]?.y ?? 0;
+        const rightBankY = lvl.rightAnchors[0]?.y ?? 0;
+
+        state.vehicles = lvl.vehicles.map((v, idx) => {
+            let startX, bankY;
+            if (v.dir === 1) {
+                startX = -halfSpan - leftQueueOffset - v.width * 0.5;
+                leftQueueOffset += v.width + 0.85;
+                bankY = leftBankY;
+            } else {
+                startX = halfSpan + rightQueueOffset + v.width * 0.5;
+                rightQueueOffset += v.width + 0.85;
+                bankY = rightBankY;
+            }
+            return {
+                ...v,
+                id: idx,
+                x: startX,
+                y: bankY - v.height * 0.5 - 0.16,
+                vx: 0,
+                vy: 0,
+                angle: 0,
+                spawned: true,
+                finished: false,
+                failed: false,
+                wheelRot: 0
+            };
+        });
+    }
+
+    function serializeBlueprint() {
+        return {
+            nodes: state.nodes.map(n => ({ id: n.id, x: n.baseX, y: n.baseY, fixed: n.fixed, isRoadAnchor: !!n.isRoadAnchor })),
+            beams: state.beams.map(b => ({ aId: b.a.id, bId: b.b.id, mat: b.mat }))
+        };
+    }
+
+    function restoreBlueprint(bp, pushHistory = false) {
+        const nodeMap = new Map();
+        state.nodes = bp.nodes.map(n => {
+            const obj = {
+                id: n.id, x: n.x, y: n.y, oldX: n.x, oldY: n.y,
+                baseX: n.x, baseY: n.y, fixed: n.fixed, isRoadAnchor: n.isRoadAnchor
+            };
+            nodeMap.set(n.id, obj);
+            return obj;
+        });
+        state.beams = [];
+        bp.beams.forEach(b => {
+            const na = nodeMap.get(b.aId);
+            const nb = nodeMap.get(b.bId);
+            if (na && nb && na !== nb) {
+                const len = Math.hypot(nb.x - na.x, nb.y - na.y);
+                state.beams.push({
+                    a: na, b: nb, mat: b.mat,
+                    restLen: len, origLen: len,
+                    stress: 0, broken: false
+                });
+            }
+        });
+        if (pushHistory) pushUndoState();
+        updateHUD();
+    }
+
+    function pushUndoState() {
+        const snap = JSON.stringify(serializeBlueprint());
+        if (state.undoStack[state.undoStack.length - 1] !== snap) {
+            state.undoStack.push(snap);
+            if (state.undoStack.length > 40) state.undoStack.shift();
+            state.redoStack = [];
+        }
+        saveCurrentBlueprintToSlot();
+        updateHUD();
+    }
+
+    function saveCurrentBlueprintToSlot() {
+        const slot = getActiveSlot();
+        if (!slot) return;
+        const bp = serializeBlueprint();
+        if (state.gameType === "ENDLESS") {
+            slot.endlessBlueprint = bp;
+        } else if (state.currentLevel) {
+            if (!slot.levelProgress[state.currentLevel.id]) {
+                slot.levelProgress[state.currentLevel.id] = { stars: 0, bestScore: 0, blueprint: null };
+            }
+            slot.levelProgress[state.currentLevel.id].blueprint = bp;
+        }
+        persistSaveData();
+    }
+
+    function calculateTotalCost() {
+        let total = 0;
+        for (const b of state.beams) {
+            const m = MATERIALS[b.mat];
+            total += Math.round(b.origLen * m.costPerM);
+        }
+        return total;
+    }
+
+    function applyAutoTriangulate() {
+        if (state.mode !== "BUILD") return;
+        const matKey = state.selectedMaterial === "road" || state.selectedMaterial === "delete" ? "wood" : state.selectedMaterial;
+        const mat = MATERIALS[matKey];
+        let added = 0;
+
+        for (let i = 0; i < state.nodes.length; i++) {
+            for (let j = i + 1; j < state.nodes.length; j++) {
+                const a = state.nodes[i];
+                const b = state.nodes[j];
+                if (a.fixed && b.fixed) continue;
+                const d = Math.hypot(b.x - a.x, b.y - a.y);
+                if (d >= 1.1 && d <= Math.min(mat.maxLength, 3.3)) {
+                    const exists = state.beams.some(bm => (bm.a === a && bm.b === b) || (bm.a === b && bm.b === a));
+                    if (!exists) {
+                        const cost = Math.round(d * mat.costPerM);
+                        if (calculateTotalCost() + cost <= state.currentLevel.budget) {
+                            state.beams.push({ a, b, mat: matKey, restLen: d, origLen: d, stress: 0, broken: false });
+                            added++;
+                        }
+                    }
+                }
+            }
+        }
+        if (added > 0) {
+            audio.playClick(680);
+            pushUndoState();
+            showToast(`Added ${added} ${mat.name} braces`);
+        } else {
+            showToast("No valid triangulation pairs in budget");
+        }
+    }
+
+    function applyAutoDeck() {
+        if (state.mode !== "BUILD") return;
+        const leftAnchor = state.nodes.find(n => n.id === "L0");
+        const rightAnchor = state.nodes.find(n => n.id === "R0");
+        if (!leftAnchor || !rightAnchor) return;
+
+        const totalDx = rightAnchor.x - leftAnchor.x;
+        const totalDy = rightAnchor.y - leftAnchor.y;
+        const totalDist = Math.hypot(totalDx, totalDy);
+        const segCount = Math.max(2, Math.ceil(totalDist / 2.5));
+        const mat = MATERIALS.road;
+
+        let prevNode = leftAnchor;
+        let added = 0;
+        for (let i = 1; i <= segCount; i++) {
+            const t = i / segCount;
+            const nx = Math.round((leftAnchor.x + totalDx * t) * 2) / 2;
+            const ny = Math.round((leftAnchor.y + totalDy * t) * 2) / 2;
+            let nextNode = i === segCount ? rightAnchor : findNearestNode(nx, ny, 0.35);
+            if (!nextNode) {
+                nextNode = {
+                    id: "N_" + Date.now() + "_" + i + "_" + Math.floor(Math.random() * 999),
+                    x: nx, y: ny, oldX: nx, oldY: ny,
+                    baseX: nx, baseY: ny, fixed: false
+                };
+                state.nodes.push(nextNode);
+            }
+            const segLen = Math.hypot(nextNode.x - prevNode.x, nextNode.y - prevNode.y);
+            const exists = state.beams.some(b => (b.a === prevNode && b.b === nextNode) || (b.a === nextNode && b.b === prevNode));
+            if (!exists && segLen >= 0.4 && segLen <= mat.maxLength) {
+                const cost = Math.round(segLen * mat.costPerM);
+                if (calculateTotalCost() + cost <= state.currentLevel.budget) {
+                    state.beams.push({ a: prevNode, b: nextNode, mat: "road", restLen: segLen, origLen: segLen, stress: 0, broken: false });
+                    added++;
+                }
+            }
+            prevNode = nextNode;
+        }
+        if (added > 0) {
+            audio.playClick(660);
+            pushUndoState();
+            showToast(`Spanned ${added} Road Deck segments — now add support triangles!`);
+        } else {
+            showToast("Road deck already spanned or insufficient budget");
+        }
+    }
+
+    /**
+     * =========================================================================
+     * 5. SIMULATION STEP (FIXED TIMESTEP 1/60s VERLET INTEGRATION)
+     * =========================================================================
+     */
+    const FIXED_DT = 1 / 60;
+    const SUBSTEPS = 10;
+    const GRAVITY = 9.81;
+
+    function startSimulation() {
+        const spent = calculateTotalCost();
+        if (spent > state.currentLevel.budget) {
+            showToast("Over budget! Remove or swap expensive beams.");
+            audio.playSnap(false);
+            return;
+        }
+        if (!state.beams.some(b => b.mat === "road")) {
+            showToast("Place at least one Road Deck segment first!");
+            audio.playSnap(false);
+            return;
+        }
+
+        audio.unlock();
+        audio.playClick(740);
+        saveCurrentBlueprintToSlot();
+
+        state.mode = "SIM";
+        state.simTime = 0;
+        state.liveStress = 0;
+        state.peakStress = 0;
+        state.failPoint = null;
+        state.particles = [];
+
+        for (const n of state.nodes) {
+            n.x = n.baseX;
+            n.y = n.baseY;
+            n.oldX = n.baseX;
+            n.oldY = n.baseY;
+            n.mass = n.fixed ? 999999 : 0.25;
+        }
+        for (const b of state.beams) {
+            b.restLen = b.origLen;
+            b.stress = 0;
+            b.broken = false;
+            const segMass = b.origLen * 0.14;
+            if (!b.a.fixed) b.a.mass += segMass * 0.5;
+            if (!b.b.fixed) b.b.mass += segMass * 0.5;
+        }
+
+        resetDynamicEntities();
+        updateHUD();
+    }
+
+    function stopSimulation() {
+        audio.stopEngine();
+        state.mode = "BUILD";
+        state.failPoint = null;
+        state.liveStress = 0;
+        for (const n of state.nodes) {
+            n.x = n.baseX;
+            n.y = n.baseY;
+            n.oldX = n.baseX;
+            n.oldY = n.baseY;
+        }
+        for (const b of state.beams) {
+            b.restLen = b.origLen;
+            b.stress = 0;
+            b.broken = false;
+        }
+        resetDynamicEntities();
+        updateHUD();
+    }
+
+    function stepPhysics(dt) {
+        if (state.mode === "FAIL_SLOWMO") {
+            state.slowMoTimer -= dt;
+            if (state.slowMoTimer <= 0) {
+                stopSimulation();
+                showToast("Structure failed — reinforce strained red beams!");
+                return;
+            }
+            dt *= 0.22;
+        }
+
+        state.simTime += dt;
+        const lvl = state.currentLevel;
+
+        // 1. Update Boat Hazard & Hydraulic Pistons
+        let pistonFactor = 0;
+        if (state.boat) {
+            if (state.simTime >= state.boat.delay) {
+                state.boat.active = true;
+                state.boat.x += state.boat.speed * dt;
+                const distToCenter = Math.abs(state.boat.x);
+                if (distToCenter < 7.5) {
+                    pistonFactor = Math.min(1, (7.5 - distToCenter) / 3.5);
+                }
+            }
+        } else {
+            pistonFactor = 0.5 - 0.5 * Math.cos(state.simTime * 1.4);
+        }
+
+        for (const b of state.beams) {
+            if (!b.broken && b.mat === "piston") {
+                b.restLen = b.origLen * (1 - 0.38 * pistonFactor);
+            }
+        }
+
+        // 2. Verlet Node Integration
+        const windForce = lvl.wind ? Math.sin(state.simTime * 2.3) * lvl.wind : 0;
+        for (const n of state.nodes) {
+            if (n.fixed) continue;
+            const vx = (n.x - n.oldX) * 0.994;
+            const vy = (n.y - n.oldY) * 0.994;
+            n.oldX = n.x;
+            n.oldY = n.y;
+            n.x += vx + windForce * dt * dt * 8;
+            n.y += vy + GRAVITY * dt * dt;
+        }
+
+        // 3. Constraint Relaxation Substeps
+        for (let step = 0; step < SUBSTEPS; step++) {
+            for (const b of state.beams) {
+                if (b.broken) continue;
+                const mat = MATERIALS[b.mat];
+                const dx = b.b.x - b.a.x;
+                const dy = b.b.y - b.a.y;
+                const dist = Math.hypot(dx, dy) || 0.0001;
+
+                if (!mat.compression && dist < b.restLen) {
+                    b.stress = 0;
+                    continue;
+                }
+
+                const diff = (dist - b.restLen) / dist;
+                const strainRatio = Math.abs(dist - b.restLen) / Math.max(0.25, b.restLen);
+                const forceMag = strainRatio * mat.strength * 28.5;
+                const stressRatio = forceMag / mat.strength;
+
+                if (step === SUBSTEPS - 1) {
+                    b.stress = stressRatio;
+                    if (stressRatio > state.peakStress && state.mode === "SIM") {
+                        state.peakStress = stressRatio;
+                    }
+                    if (stressRatio > 1.0 && state.mode === "SIM") {
+                        b.broken = true;
+                        const midX = (b.a.x + b.b.x) * 0.5;
+                        const midY = (b.a.y + b.b.y) * 0.5;
+                        spawnSparks(midX, midY, mat.color, 22);
+                        audio.playSnap(b.mat === "steel" || b.mat === "cable");
+                        triggerFailureSlowMo(midX, midY);
+                    }
+                }
+
+                const correction = diff * mat.stiffness * 0.5;
+                const wA = b.a.fixed ? 0 : 1 / b.a.mass;
+                const wB = b.b.fixed ? 0 : 1 / b.b.mass;
+                const wSum = wA + wB || 1;
+
+                if (!b.a.fixed) {
+                    b.a.x += dx * correction * (wA / wSum) * 2;
+                    b.a.y += dy * correction * (wA / wSum) * 2;
+                }
+                if (!b.b.fixed) {
+                    b.b.x -= dx * correction * (wB / wSum) * 2;
+                    b.b.y -= dy * correction * (wB / wSum) * 2;
+                }
+            }
+        }
+
+        // Track instantaneous maximum beam stress
+        let currentMaxStress = 0;
+        for (const b of state.beams) {
+            if (!b.broken && b.stress > currentMaxStress) {
+                currentMaxStress = b.stress;
+            }
+        }
+        state.liveStress = currentMaxStress;
+
+        // 4. Vehicle Movement & Smooth Multi-Segment Deck Coupling
+        let anyActiveVehicle = false;
+        let maxVehSpeed = 0;
+        const halfSpan = lvl.spanMeters / 2;
+
+        for (const v of state.vehicles) {
+            if (v.finished || state.simTime < v.delay) continue;
+            anyActiveVehicle = true;
+
+            const targetVx = v.dir * v.speed;
+            v.vx += (targetVx - v.vx) * 5 * dt;
+            v.x += v.vx * dt;
+            v.wheelRot += (v.vx * dt) / 0.35;
+            maxVehSpeed = Math.max(maxVehSpeed, Math.abs(v.vx));
+
+            const frontX = v.x + v.dir * (v.width * 0.35);
+            const rearX = v.x - v.dir * (v.width * 0.35);
+            const midX = v.x;
+            const frontSupport = sampleRoadHeight(frontX, halfSpan, lvl);
+            const rearSupport = sampleRoadHeight(rearX, halfSpan, lvl);
+            const midSupport = sampleRoadHeight(midX, halfSpan, lvl);
+
+            const hasSupport = frontSupport.supported || rearSupport.supported || midSupport.supported;
+            const bestY = Math.min(frontSupport.y, rearSupport.y, midSupport.y);
+            const targetY = bestY - v.height * 0.5 - 0.16;
+
+            if (hasSupport) {
+                if (v.y + v.height * 0.5 >= bestY - 0.32 && v.vy >= -2.2) {
+                    v.y = targetY;
+                    v.vy = 0;
+                    if (frontSupport.supported && rearSupport.supported) {
+                        const slopeY = frontSupport.y - rearSupport.y;
+                        const slopeX = frontX - rearX;
+                        const rawAngle = Math.atan2(slopeY, slopeX);
+                        v.angle = v.dir === 1 ? rawAngle : Math.atan2(-slopeY, -slopeX);
+                    } else {
+                        v.angle *= 0.85;
+                    }
+
+                    applyLoadToSupport(frontSupport, v.mass * 0.45, dt);
+                    applyLoadToSupport(rearSupport, v.mass * 0.45, dt);
+                    applyLoadToSupport(midSupport, v.mass * 0.25, dt);
+
+                    if (Math.random() < 0.28) {
+                        state.particles.push({
+                            x: v.x - v.dir * (v.width * 0.48),
+                            y: v.y + v.height * 0.2,
+                            vx: -v.dir * (0.8 + Math.random() * 0.8),
+                            vy: -0.4 - Math.random() * 0.5,
+                            life: 0.35,
+                            maxLife: 0.35,
+                            color: "rgba(203, 213, 225, 0.55)"
+                        });
+                    }
+                } else {
+                    v.vy += GRAVITY * dt;
+                    v.y += v.vy * dt;
+                }
+            } else {
+                v.vy += GRAVITY * dt;
+                v.y += v.vy * dt;
+            }
+
+            // Star collection check
+            for (const s of state.stars) {
+                if (!s.collected && Math.hypot(v.x - s.x, v.y - s.y) < 1.45) {
+                    s.collected = true;
+                    spawnSparks(s.x, s.y, "#fbbf24", 18);
+                    audio.playStar();
+                    showToast("★ Bonus Star Collected!");
+                }
+            }
+
+            // Boat collision check
+            if (state.boat && state.boat.active) {
+                if (Math.abs(v.x - state.boat.x) < 1.8 && v.y + v.height * 0.5 > state.boat.mastTopY) {
+                    spawnSparks(v.x, v.y, "#ef4444", 24);
+                    audio.playSnap(true);
+                    triggerFailureSlowMo(v.x, v.y);
+                }
+            }
+
+            // Water splash failure check
+            if (v.y > lvl.waterY + 0.3 && state.mode === "SIM") {
+                spawnSparks(v.x, lvl.waterY, "#38bdf8", 30);
+                audio.playSnap(false);
+                triggerFailureSlowMo(v.x, lvl.waterY);
+            }
+
+            if ((v.dir === 1 && v.x > halfSpan + 2.2) || (v.dir === -1 && v.x < -halfSpan - 2.2)) {
+                v.finished = true;
+            }
+        }
+
+        if (anyActiveVehicle && state.mode === "SIM") {
+            audio.updateEngine(maxVehSpeed / 5);
+        } else {
+            audio.stopEngine();
+        }
+
+        if (state.mode === "SIM" && state.vehicles.every(v => v.finished)) {
+            handleLevelVictory();
+        }
+    }
+
+    function sampleRoadHeight(wx, halfSpan, lvl) {
+        const leftBankY = lvl.leftAnchors[0]?.y ?? 0;
+        const rightBankY = lvl.rightAnchors[0]?.y ?? 0;
+        if (wx <= -halfSpan) return { supported: true, y: leftBankY, beam: null, t: 0 };
+        if (wx >= halfSpan) return { supported: true, y: rightBankY, beam: null, t: 0 };
+
+        let best = { supported: false, y: 999, beam: null, t: 0 };
+        for (const b of state.beams) {
+            if (b.broken || b.mat !== "road") continue;
+            const minX = Math.min(b.a.x, b.b.x) - 0.14;
+            const maxX = Math.max(b.a.x, b.b.x) + 0.14;
+            if (wx >= minX && wx <= maxX) {
+                const spanX = b.b.x - b.a.x;
+                const t = Math.abs(spanX) < 0.001 ? 0.5 : Math.max(0, Math.min(1, (wx - b.a.x) / spanX));
+                const ry = b.a.y + (b.b.y - b.a.y) * t;
+                if (ry < best.y) {
+                    best = { supported: true, y: ry, beam: b, t };
+                }
+            }
+        }
+        return best;
+    }
+
+    function applyLoadToSupport(support, mass, dt) {
+        if (!support.beam) return;
+        const b = support.beam;
+        const impulse = mass * GRAVITY * dt * dt * 1.8;
+        if (!b.a.fixed) b.a.y += impulse * (1 - support.t);
+        if (!b.b.fixed) b.b.y += impulse * support.t;
+    }
+
+    function triggerFailureSlowMo(wx, wy) {
+        if (state.mode !== "SIM") return;
+        state.mode = "FAIL_SLOWMO";
+        state.slowMoTimer = 1.5;
+        state.failPoint = { x: wx, y: wy };
+        audio.stopEngine();
+    }
+
+    function handleLevelVictory() {
+        audio.stopEngine();
+        audio.playWin();
+        state.mode = "WIN";
+
+        const lvl = state.currentLevel;
+        const spent = calculateTotalCost();
+        const budgetRatio = Math.max(0, (lvl.budget - spent) / lvl.budget);
+        const collectedStars = state.stars.filter(s => s.collected).length;
+        const totalStars = state.stars.length;
+
+        let earnedStars = 1;
+        if (budgetRatio >= 0.12) earnedStars++;
+        if (collectedStars === totalStars && totalStars > 0) earnedStars++;
+        earnedStars = Math.min(3, Math.max(1, earnedStars));
+
+        const stressBonus = state.peakStress >= 0.90 ? 500 : 0;
+        const score = Math.round(1000 + budgetRatio * 2000 + earnedStars * 400 + stressBonus);
+
+        const slot = getActiveSlot();
+        if (state.gameType === "CAMPAIGN") {
+            const prev = slot.levelProgress[lvl.id] || { stars: 0, bestScore: 0, blueprint: null };
+            slot.levelProgress[lvl.id] = {
+                stars: Math.max(prev.stars, earnedStars),
+                bestScore: Math.max(prev.bestScore, score),
+                blueprint: serializeBlueprint()
+            };
+            persistSaveData();
+        } else {
+            slot.endlessWave = (slot.endlessWave || 1) + 1;
+            slot.endlessCash = Math.max(3500, lvl.budget - spent + 3200);
+            slot.endlessBlueprint = serializeBlueprint();
+            persistSaveData();
+        }
+
+        showResultModal(spent, score, earnedStars, stressBonus > 0);
+    }
+
+    /**
+     * =========================================================================
+     * 6. PARTICLE SYSTEM & HIGH-DPI WORLD RENDERING
+     * =========================================================================
+     */
+    function spawnSparks(wx, wy, color, count) {
+        for (let i = 0; i < count; i++) {
+            const ang = Math.random() * Math.PI * 2;
+            const spd = 1.5 + Math.random() * 5.5;
+            state.particles.push({
+                x: wx, y: wy,
+                vx: Math.cos(ang) * spd,
+                vy: Math.sin(ang) * spd - 2,
+                life: 0.4 + Math.random() * 0.45,
+                maxLife: 0.85,
+                color
+            });
+        }
+    }
+
+    function updateParticles(dt) {
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+            const p = state.particles[i];
+            p.life -= dt;
+            if (p.life <= 0) {
+                state.particles.splice(i, 1);
+                continue;
+            }
+            p.vy += 12 * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+        }
+    }
+
+    function worldToScreen(wx, wy) {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        return {
+            x: w * 0.5 + (wx - state.cam.x) * state.cam.scale,
+            y: h * 0.50 + (wy - state.cam.y) * state.cam.scale
+        };
+    }
+
+    function screenToWorld(sx, sy) {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        return {
+            x: (sx - w * 0.5) / state.cam.scale + state.cam.x,
+            y: (sy - h * 0.50) / state.cam.scale + state.cam.y
+        };
+    }
+
+    function fitCameraToLevel() {
+        const lvl = state.currentLevel;
+        if (!lvl) return;
+        const w = canvas.clientWidth || window.innerWidth;
+        const targetSpan = lvl.spanMeters + 12.5;
+        state.cam.scale = Math.max(18, Math.min(50, w / targetSpan));
+        state.cam.x = -0.8;
+        state.cam.y = 0.4;
+    }
+
+    function getStressColor(stress, baseColor) {
+        if (!state.showStress || state.mode === "BUILD") return baseColor;
+        const s = Math.min(1, Math.max(0, stress));
+        if (s < 0.38) {
+            const t = s / 0.38;
+            const r = Math.round(16 + (250 - 16) * t);
+            const g = Math.round(185 + (204 - 185) * t);
+            const b = Math.round(129 + (21 - 129) * t);
+            return `rgb(${r},${g},${b})`;
+        } else if (s < 0.72) {
+            const t = (s - 0.38) / 0.34;
+            const r = Math.round(250 + (249 - 250) * t);
+            const g = Math.round(204 + (115 - 204) * t);
+            const b = Math.round(21 + (22 - 21) * t);
+            return `rgb(${r},${g},${b})`;
+        } else {
+            const t = (s - 0.72) / 0.28;
+            const r = Math.round(249 + (239 - 249) * t);
+            const g = Math.round(115 + (44 - 115) * t);
+            const b = Math.round(22 + (44 - 22) * t);
+            return `rgb(${r},${g},${b})`;
+        }
+    }
+
+    function renderWorld(targetCtx, viewW, viewH) {
+        const lvl = state.currentLevel;
+        if (!lvl) return;
+
+        // 1. Rich Atmospheric Twilight Sky & Parallax Mountains
+        const skyGrad = targetCtx.createLinearGradient(0, 0, 0, viewH);
+        skyGrad.addColorStop(0, "#060b16");
+        skyGrad.addColorStop(0.55, "#0f1c34");
+        skyGrad.addColorStop(1, "#18294a");
+        targetCtx.fillStyle = skyGrad;
+        targetCtx.fillRect(0, 0, viewW, viewH);
+
+        // Distant Parallax Mountain Ridge
+        targetCtx.fillStyle = "rgba(15, 23, 42, 0.72)";
+        targetCtx.beginPath();
+        targetCtx.moveTo(0, viewH);
+        targetCtx.lineTo(0, viewH * 0.45);
+        targetCtx.lineTo(viewW * 0.22, viewH * 0.28);
+        targetCtx.lineTo(viewW * 0.48, viewH * 0.42);
+        targetCtx.lineTo(viewW * 0.76, viewH * 0.25);
+        targetCtx.lineTo(viewW, viewH * 0.40);
+        targetCtx.lineTo(viewW, viewH);
+        targetCtx.closePath();
+        targetCtx.fill();
+
+        // 2. Blueprint Grid (Build Mode)
+        if (state.mode === "BUILD") {
+            const topLeft = screenToWorld(0, 0);
+            const botRight = screenToWorld(viewW, viewH);
+            const startX = Math.floor(topLeft.x);
+            const endX = Math.ceil(botRight.x);
+            const startY = Math.floor(topLeft.y);
+            const endY = Math.ceil(botRight.y);
+
+            targetCtx.lineWidth = 1;
+            for (let gx = startX; gx <= endX; gx++) {
+                const sp = worldToScreen(gx, 0);
+                targetCtx.strokeStyle = gx % 5 === 0 ? "rgba(56, 189, 248, 0.16)" : "rgba(56, 189, 248, 0.06)";
+                targetCtx.beginPath();
+                targetCtx.moveTo(sp.x, 0);
+                targetCtx.lineTo(sp.x, viewH);
+                targetCtx.stroke();
+            }
+            for (let gy = startY; gy <= endY; gy++) {
+                const sp = worldToScreen(0, gy);
+                targetCtx.strokeStyle = gy % 5 === 0 ? "rgba(56, 189, 248, 0.16)" : "rgba(56, 189, 248, 0.06)";
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, sp.y);
+                targetCtx.lineTo(viewW, sp.y);
+                targetCtx.stroke();
+            }
+        }
+
+        // 3. Water / Canyon River
+        const waterTop = worldToScreen(0, lvl.waterY).y;
+        const waterGrad = targetCtx.createLinearGradient(0, waterTop, 0, viewH);
+        waterGrad.addColorStop(0, "rgba(14, 165, 233, 0.45)");
+        waterGrad.addColorStop(1, "rgba(3, 105, 161, 0.88)");
+        targetCtx.fillStyle = waterGrad;
+        targetCtx.fillRect(0, waterTop, viewW, viewH - waterTop);
+
+        targetCtx.strokeStyle = "rgba(125, 211, 252, 0.6)";
+        targetCtx.lineWidth = 2;
+        targetCtx.beginPath();
+        for (let sx = 0; sx <= viewW; sx += 24) {
+            const wy = waterTop + Math.sin(sx * 0.03 + state.simTime * 3) * 2.5;
+            if (sx === 0) targetCtx.moveTo(sx, wy);
+            else targetCtx.lineTo(sx, wy);
+        }
+        targetCtx.stroke();
+
+        // 4. Left & Right Cliff Terrain Banks
+        const halfSpan = lvl.spanMeters / 2;
+        const leftBankY = lvl.leftAnchors[0]?.y ?? 0;
+        const rightBankY = lvl.rightAnchors[0]?.y ?? 0;
+        const leftEdge = worldToScreen(-halfSpan, leftBankY);
+        const rightEdge = worldToScreen(halfSpan, rightBankY);
+
+        targetCtx.fillStyle = "#1e293b";
+        targetCtx.strokeStyle = "#334155";
+        targetCtx.lineWidth = 3;
+
+        // Left bank polygon
+        targetCtx.beginPath();
+        targetCtx.moveTo(0, leftEdge.y);
+        targetCtx.lineTo(leftEdge.x, leftEdge.y);
+        targetCtx.lineTo(leftEdge.x - 18, viewH);
+        targetCtx.lineTo(0, viewH);
+        targetCtx.closePath();
+        targetCtx.fill();
+        targetCtx.stroke();
+
+        // Right bank polygon
+        targetCtx.beginPath();
+        targetCtx.moveTo(rightEdge.x, rightEdge.y);
+        targetCtx.lineTo(viewW, rightEdge.y);
+        targetCtx.lineTo(viewW, viewH);
+        targetCtx.lineTo(rightEdge.x + 18, viewH);
+        targetCtx.closePath();
+        targetCtx.fill();
+        targetCtx.stroke();
+
+        // Road approach pavement on banks
+        targetCtx.fillStyle = "#64748b";
+        targetCtx.fillRect(0, leftEdge.y - 4, leftEdge.x, 8);
+        targetCtx.fillRect(rightEdge.x, rightEdge.y - 4, viewW - rightEdge.x, 8);
+
+        // 5. Cargo Boat Hazard
+        if (state.boat) {
+            const bPos = worldToScreen(state.boat.x, state.boat.y);
+            const mastTop = worldToScreen(state.boat.x, state.boat.mastTopY).y;
+            const s = state.cam.scale;
+            targetCtx.fillStyle = "#dc2626";
+            targetCtx.beginPath();
+            targetCtx.moveTo(bPos.x - 1.5 * s, bPos.y - 0.35 * s);
+            targetCtx.lineTo(bPos.x + 1.5 * s, bPos.y - 0.35 * s);
+            targetCtx.lineTo(bPos.x + 1.1 * s, bPos.y + 0.25 * s);
+            targetCtx.lineTo(bPos.x - 1.1 * s, bPos.y + 0.25 * s);
+            targetCtx.closePath();
+            targetCtx.fill();
+
+            targetCtx.strokeStyle = "#f8fafc";
+            targetCtx.lineWidth = 3;
+            targetCtx.beginPath();
+            targetCtx.moveTo(bPos.x, bPos.y - 0.35 * s);
+            targetCtx.lineTo(bPos.x, mastTop);
+            targetCtx.stroke();
+        }
+
+        // 6. Bonus Stars
+        for (const st of state.stars) {
+            if (st.collected) continue;
+            const sp = worldToScreen(st.x, st.y);
+            drawStarShape(targetCtx, sp.x, sp.y, 5, 13, 6, "#fbbf24");
+        }
+
+        // 6b. Animated Crosswind Streamers when Wind Hazard is Active
+        if (lvl.wind > 0) {
+            targetCtx.save();
+            targetCtx.strokeStyle = "rgba(186, 230, 253, 0.24)";
+            targetCtx.lineWidth = 1.5;
+            targetCtx.lineCap = "round";
+            const tNow = performance.now() * 0.001;
+            for (let i = 0; i < 6; i++) {
+                const wy = (viewH * 0.16) + i * 44;
+                const wx = ((tNow * (120 + lvl.wind * 180) + i * 190) % (viewW + 140)) - 70;
+                targetCtx.beginPath();
+                targetCtx.moveTo(wx, wy);
+                targetCtx.quadraticCurveTo(wx + 24, wy - 4, wx + 48, wy);
+                targetCtx.stroke();
+            }
+            targetCtx.restore();
+        }
+
+        // 7. Bridge Beams (with live color-shifting stress glow during simulation)
+        let hottestBeam = null;
+        for (const b of state.beams) {
+            if (b.broken) continue;
+            const mat = MATERIALS[b.mat];
+            const pa = worldToScreen(b.a.x, b.a.y);
+            const pb = worldToScreen(b.b.x, b.b.y);
+            const strokeCol = getStressColor(b.stress, mat.color);
+
+            if (state.showStress && state.mode !== "BUILD" && b.stress > 0.15) {
+                if (!hottestBeam || b.stress > hottestBeam.stress) {
+                    hottestBeam = b;
+                }
+            }
+
+            targetCtx.save();
+            if (state.showStress && state.mode !== "BUILD" && b.stress > 0.35) {
+                targetCtx.shadowColor = strokeCol;
+                targetCtx.shadowBlur = Math.min(18, b.stress * 16);
+            }
+            targetCtx.strokeStyle = strokeCol;
+            targetCtx.lineWidth = mat.width * (state.cam.scale / 38);
+            targetCtx.lineCap = "round";
+
+            const curDist = Math.hypot(b.b.x - b.a.x, b.b.y - b.a.y);
+            if (!mat.compression && curDist < b.restLen * 0.98) {
+                const slack = Math.min(28, (b.restLen - curDist) * state.cam.scale * 0.7);
+                targetCtx.beginPath();
+                targetCtx.moveTo(pa.x, pa.y);
+                targetCtx.quadraticCurveTo((pa.x + pb.x) * 0.5, (pa.y + pb.y) * 0.5 + slack, pb.x, pb.y);
+                targetCtx.stroke();
+            } else {
+                targetCtx.beginPath();
+                targetCtx.moveTo(pa.x, pa.y);
+                targetCtx.lineTo(pb.x, pb.y);
+                targetCtx.stroke();
+            }
+            targetCtx.restore();
+
+            if (mat.isRoad) {
+                targetCtx.strokeStyle = "#f8fafc";
+                targetCtx.lineWidth = 1.5;
+                targetCtx.setLineDash([6, 6]);
+                targetCtx.beginPath();
+                targetCtx.moveTo(pa.x, pa.y - 2);
+                targetCtx.lineTo(pb.x, pb.y - 2);
+                targetCtx.stroke();
+                targetCtx.setLineDash([]);
+            }
+        }
+
+        // Floating Live Stress % Callout above the highest-strained beam during simulation
+        if (hottestBeam && state.showStress && state.mode !== "BUILD") {
+            const mx = (hottestBeam.a.x + hottestBeam.b.x) * 0.5;
+            const my = (hottestBeam.a.y + hottestBeam.b.y) * 0.5;
+            const sp = worldToScreen(mx, my);
+            const pct = Math.min(100, Math.round(hottestBeam.stress * 100));
+            const badgeCol = getStressColor(hottestBeam.stress, "#10b981");
+
+            targetCtx.save();
+            const label = `${pct}%`;
+            targetCtx.font = "800 11px sans-serif";
+            const bw = targetCtx.measureText(label).width + 12;
+            targetCtx.fillStyle = "rgba(9, 15, 30, 0.92)";
+            targetCtx.beginPath();
+            targetCtx.roundRect(sp.x - bw * 0.5, sp.y - 26, bw, 18, 6);
+            targetCtx.fill();
+            targetCtx.strokeStyle = badgeCol;
+            targetCtx.lineWidth = 1.5;
+            targetCtx.stroke();
+            targetCtx.fillStyle = badgeCol;
+            targetCtx.textAlign = "center";
+            targetCtx.fillText(label, sp.x, sp.y - 13);
+            targetCtx.restore();
+        }
+
+        // 8. Interactive Draft Beam Preview (Build Mode)
+        if (state.mode === "BUILD" && state.pointer.dragStartNode && state.selectedMaterial !== "delete") {
+            const mat = MATERIALS[state.selectedMaterial];
+            const startP = worldToScreen(state.pointer.dragStartNode.x, state.pointer.dragStartNode.y);
+            const targetW = state.pointer.snapNode || snapToGrid(state.pointer.worldX, state.pointer.worldY);
+            const endP = worldToScreen(targetW.x, targetW.y);
+            const dist = Math.hypot(targetW.x - state.pointer.dragStartNode.x, targetW.y - state.pointer.dragStartNode.y);
+            const valid = dist >= 0.4 && dist <= mat.maxLength;
+
+            targetCtx.strokeStyle = valid ? mat.color : "#ef4444";
+            targetCtx.lineWidth = mat.width;
+            targetCtx.setLineDash([6, 4]);
+            targetCtx.beginPath();
+            targetCtx.moveTo(startP.x, startP.y);
+            targetCtx.lineTo(endP.x, endP.y);
+            targetCtx.stroke();
+            targetCtx.setLineDash([]);
+
+            // Target snap ring
+            targetCtx.beginPath();
+            targetCtx.arc(endP.x, endP.y, 8, 0, Math.PI * 2);
+            targetCtx.strokeStyle = valid ? "#38bdf8" : "#ef4444";
+            targetCtx.lineWidth = 2;
+            targetCtx.stroke();
+
+            const cost = Math.round(dist * mat.costPerM);
+            const pillText = valid ? `${dist.toFixed(1)}m • $${cost}` : `Max ${mat.maxLength}m`;
+            targetCtx.font = "bold 11px sans-serif";
+            const pw = targetCtx.measureText(pillText).width + 14;
+            targetCtx.fillStyle = "rgba(13, 22, 40, 0.94)";
+            targetCtx.beginPath();
+            targetCtx.roundRect(endP.x + 12, endP.y - 26, pw, 20, 6);
+            targetCtx.fill();
+            targetCtx.fillStyle = valid ? "#38bdf8" : "#ef4444";
+            targetCtx.fillText(pillText, endP.x + 19, endP.y - 12);
+        }
+
+        // 9. Structural Joint Nodes
+        for (const n of state.nodes) {
+            const p = worldToScreen(n.x, n.y);
+            if (n.fixed && state.mode === "BUILD") {
+                targetCtx.beginPath();
+                targetCtx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+                targetCtx.fillStyle = "rgba(239, 68, 68, 0.22)";
+                targetCtx.fill();
+            }
+            targetCtx.beginPath();
+            targetCtx.arc(p.x, p.y, n.fixed ? 6.5 : 4.8, 0, Math.PI * 2);
+            targetCtx.fillStyle = n.fixed ? "#ef4444" : "#f8fafc";
+            targetCtx.fill();
+            targetCtx.lineWidth = 2;
+            targetCtx.strokeStyle = "#0f172a";
+            targetCtx.stroke();
+        }
+
+        // 10. Staged & Active Vehicles
+        for (const v of state.vehicles) {
+            if (!v.spawned || v.finished) continue;
+            drawVehicle(targetCtx, v);
+        }
+
+        // 11. Particles
+        for (const pt of state.particles) {
+            const p = worldToScreen(pt.x, pt.y);
+            targetCtx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+            targetCtx.fillStyle = pt.color;
+            targetCtx.beginPath();
+            targetCtx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+            targetCtx.fill();
+        }
+        targetCtx.globalAlpha = 1;
+
+        // 12. Slow-Mo Failure Crosshair Indicator
+        if (state.mode === "FAIL_SLOWMO" && state.failPoint) {
+            const fp = worldToScreen(state.failPoint.x, state.failPoint.y);
+            targetCtx.save();
+            targetCtx.strokeStyle = "#ef4444";
+            targetCtx.lineWidth = 2.5;
+            targetCtx.beginPath();
+            targetCtx.arc(fp.x, fp.y, 26, 0, Math.PI * 2);
+            targetCtx.stroke();
+            targetCtx.fillStyle = "rgba(239, 68, 68, 0.92)";
+            targetCtx.font = "900 11px sans-serif";
+            targetCtx.textAlign = "center";
+            targetCtx.fillText("STRUCTURAL FAILURE", fp.x, fp.y - 34);
+            targetCtx.restore();
+        }
+    }
+
+    function drawVehicle(targetCtx, v) {
+        const p = worldToScreen(v.x, v.y);
+        const s = state.cam.scale;
+        const w = v.width * s;
+        const h = v.height * s;
+
+        targetCtx.save();
+        targetCtx.translate(p.x, p.y);
+        targetCtx.rotate(v.angle);
+        if (v.dir === -1) targetCtx.scale(-1, 1);
+
+        // Vehicle Chassis & Cabin
+        targetCtx.fillStyle = v.color;
+        targetCtx.beginPath();
+        targetCtx.roundRect(-w * 0.5, -h * 0.42, w, h * 0.62, 6);
+        targetCtx.fill();
+
+        if (v.type === "bus") {
+            targetCtx.fillStyle = "rgba(15, 23, 42, 0.55)";
+            targetCtx.fillRect(-w * 0.4, -h * 0.34, w * 0.8, h * 0.26);
+            targetCtx.strokeStyle = "#0f172a";
+            targetCtx.lineWidth = 2;
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, -h * 0.42);
+            targetCtx.lineTo(0, h * 0.2);
+            targetCtx.stroke();
+        } else if (v.type === "truck") {
+            targetCtx.fillStyle = "#92400e";
+            targetCtx.fillRect(-w * 0.48, -h * 0.56, w * 0.56, h * 0.22);
+            targetCtx.fillStyle = "rgba(255,255,255,0.35)";
+            targetCtx.fillRect(w * 0.16, -h * 0.34, w * 0.24, h * 0.24);
+        } else {
+            targetCtx.fillStyle = "rgba(255,255,255,0.35)";
+            targetCtx.fillRect(-w * 0.18, -h * 0.34, w * 0.42, h * 0.24);
+        }
+
+        // Headlight glow
+        targetCtx.fillStyle = "#fef08a";
+        targetCtx.fillRect(w * 0.46, -h * 0.16, 4, 5);
+
+        // Rotating Wheels
+        const wheelR = (v.type === "monster" ? 0.32 : 0.22) * s;
+        const wheelOffsets = v.type === "bus" ? [-w * 0.34, 0, w * 0.34] : [-w * 0.3, w * 0.3];
+        for (const wx of wheelOffsets) {
+            targetCtx.save();
+            targetCtx.translate(wx, h * 0.24);
+            targetCtx.rotate(v.wheelRot);
+            targetCtx.fillStyle = "#0f172a";
+            targetCtx.beginPath();
+            targetCtx.arc(0, 0, wheelR, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.strokeStyle = "#cbd5e1";
+            targetCtx.lineWidth = 2;
+            targetCtx.stroke();
+            targetCtx.beginPath();
+            targetCtx.moveTo(-wheelR * 0.6, 0);
+            targetCtx.lineTo(wheelR * 0.6, 0);
+            targetCtx.stroke();
+            targetCtx.restore();
+        }
+
+        targetCtx.restore();
+
+        // Staged Vehicle Weight Badge in Build Mode
+        if (state.mode === "BUILD" && v.label) {
+            targetCtx.save();
+            targetCtx.font = "700 10px sans-serif";
+            const tw = targetCtx.measureText(v.label).width + 10;
+            targetCtx.fillStyle = "rgba(15, 23, 42, 0.88)";
+            targetCtx.beginPath();
+            targetCtx.roundRect(p.x - tw * 0.5, p.y - h * 0.5 - 22, tw, 16, 5);
+            targetCtx.fill();
+            targetCtx.strokeStyle = "rgba(148, 163, 184, 0.3)";
+            targetCtx.lineWidth = 1;
+            targetCtx.stroke();
+            targetCtx.fillStyle = "#e2e8f0";
+            targetCtx.textAlign = "center";
+            targetCtx.fillText(v.label, p.x, p.y - h * 0.5 - 10);
+            targetCtx.restore();
+        }
+    }
+
+    function drawStarShape(targetCtx, cx, cy, spikes, outerR, innerR, color) {
+        let rot = (Math.PI / 2) * 3;
+        const step = Math.PI / spikes;
+        targetCtx.beginPath();
+        targetCtx.moveTo(cx, cy - outerR);
+        for (let i = 0; i < spikes; i++) {
+            targetCtx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+            rot += step;
+            targetCtx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+            rot += step;
+        }
+        targetCtx.closePath();
+        targetCtx.fillStyle = color;
+        targetCtx.fill();
+    }
+
+    function renderFrame() {
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+        }
+
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        const prevCam = { ...state.cam };
+        if (state.mode === "FAIL_SLOWMO" && state.failPoint) {
+            state.cam.x += (state.failPoint.x - state.cam.x) * 0.12;
+            state.cam.y += (state.failPoint.y - state.cam.y) * 0.12;
+            state.cam.scale += (prevCam.scale * 1.45 - state.cam.scale) * 0.08;
+        }
+
+        renderWorld(ctx, w, h);
+
+        // Touch Magnifier Loupe (iPhone / iPad Precision Placement)
+        if (state.mode === "BUILD" && state.pointer.active && state.pointer.isTouch && state.pointer.dragStartNode) {
+            const loupeR = 54;
+            const lx = Math.max(loupeR + 12, Math.min(w - loupeR - 12, state.pointer.screenX));
+            const ly = Math.max(loupeR + 65, state.pointer.screenY - 96);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(lx, ly, loupeR, 0, Math.PI * 2);
+            ctx.clip();
+
+            ctx.translate(lx, ly);
+            ctx.scale(2.0, 2.0);
+            ctx.translate(-state.pointer.screenX, -state.pointer.screenY);
+            renderWorld(ctx, w, h);
+            ctx.restore();
+
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(lx, ly, loupeR, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(lx - 10, ly); ctx.lineTo(lx + 10, ly);
+            ctx.moveTo(lx, ly - 10); ctx.lineTo(lx, ly + 10);
+            ctx.stroke();
+        }
+
+        if (state.mode === "FAIL_SLOWMO") {
+            state.cam = prevCam;
+        }
+
+        ctx.restore();
+    }
+
+    /**
+     * =========================================================================
+     * 7. INPUT HANDLING (MOUSE, TOUCH LOUPE, 2-FINGER PINCH ZOOM, SHORTCUTS)
+     * =========================================================================
+     */
+    function snapToGrid(wx, wy) {
+        return {
+            x: Math.round(wx * 2) / 2,
+            y: Math.round(wy * 2) / 2
+        };
+    }
+
+    function findNearestNode(wx, wy, maxDist = 0.7) {
+        let best = null;
+        let bestD = maxDist;
+        for (const n of state.nodes) {
+            const d = Math.hypot(n.x - wx, n.y - wy);
+            if (d < bestD) {
+                bestD = d;
+                best = n;
+            }
+        }
+        return best;
+    }
+
+    function findNearestBeam(wx, wy, maxDist = 0.45) {
+        let best = null;
+        let bestD = maxDist;
+        for (const b of state.beams) {
+            const dx = b.b.x - b.a.x;
+            const dy = b.b.y - b.a.y;
+            const lenSq = dx * dx + dy * dy || 0.0001;
+            const t = Math.max(0, Math.min(1, ((wx - b.a.x) * dx + (wy - b.a.y) * dy) / lenSq));
+            const px = b.a.x + t * dx;
+            const py = b.a.y + t * dy;
+            const d = Math.hypot(wx - px, wy - py);
+            if (d < bestD) {
+                bestD = d;
+                best = b;
+            }
+        }
+        return best;
+    }
+
+    function deleteBeamAndOrphans(beam) {
+        state.beams = state.beams.filter(b => b !== beam);
+        state.nodes = state.nodes.filter(n => n.fixed || state.beams.some(b => b.a === n || b.b === n));
+        audio.playClick(340);
+        pushUndoState();
+    }
+
+    function deleteNodeAndBeams(node) {
+        if (!node || node.fixed) return;
+        state.beams = state.beams.filter(b => b.a !== node && b.b !== node);
+        state.nodes = state.nodes.filter(n => n.fixed || state.beams.some(b => b.a === n || b.b === n));
+        audio.playClick(320);
+        pushUndoState();
+    }
+
+    function onPointerDown(sx, sy, isTouch, button = 0) {
+        audio.unlock();
+        if (state.mode !== "BUILD") return;
+
+        const wPos = screenToWorld(sx, sy);
+        state.pointer.active = true;
+        state.pointer.isTouch = isTouch;
+        state.pointer.screenX = sx;
+        state.pointer.screenY = sy;
+        state.pointer.worldX = wPos.x;
+        state.pointer.worldY = wPos.y;
+
+        if (button === 2 || state.selectedMaterial === "delete") {
+            const hitNode = findNearestNode(wPos.x, wPos.y, 0.55);
+            if (hitNode && !hitNode.fixed) {
+                deleteNodeAndBeams(hitNode);
+                return;
+            }
+            const beam = findNearestBeam(wPos.x, wPos.y, isTouch ? 0.65 : 0.45);
+            if (beam) deleteBeamAndOrphans(beam);
+            return;
+        }
+
+        const existingNode = findNearestNode(wPos.x, wPos.y, isTouch ? 0.9 : 0.7);
+        if (existingNode) {
+            state.pointer.dragStartNode = existingNode;
+            audio.playClick(480);
+        } else {
+            state.pointer.panning = true;
+            state.pointer.lastPanX = sx;
+            state.pointer.lastPanY = sy;
+        }
+    }
+
+    function onPointerMove(sx, sy) {
+        if (!state.pointer.active || state.pointer.pinching) return;
+        const wPos = screenToWorld(sx, sy);
+        state.pointer.screenX = sx;
+        state.pointer.screenY = sy;
+        state.pointer.worldX = wPos.x;
+        state.pointer.worldY = wPos.y;
+
+        if (state.pointer.panning) {
+            const dx = (sx - state.pointer.lastPanX) / state.cam.scale;
+            const dy = (sy - state.pointer.lastPanY) / state.cam.scale;
+            state.cam.x -= dx;
+            state.cam.y -= dy;
+            state.pointer.lastPanX = sx;
+            state.pointer.lastPanY = sy;
+            return;
+        }
+
+        if (state.pointer.dragStartNode) {
+            state.pointer.snapNode = findNearestNode(wPos.x, wPos.y, 0.7);
+        }
+    }
+
+    function onPointerUp() {
+        if (!state.pointer.active && !state.pointer.pinching) return;
+
+        if (state.mode === "BUILD" && !state.pointer.pinching && state.pointer.dragStartNode && state.selectedMaterial !== "delete") {
+            const startNode = state.pointer.dragStartNode;
+            const mat = MATERIALS[state.selectedMaterial];
+            let targetNode = state.pointer.snapNode;
+
+            if (!targetNode) {
+                const gridP = snapToGrid(state.pointer.worldX, state.pointer.worldY);
+                const d = Math.hypot(gridP.x - startNode.x, gridP.y - startNode.y);
+                if (d >= 0.4 && d <= mat.maxLength) {
+                    targetNode = {
+                        id: "N_" + Date.now() + "_" + Math.floor(Math.random() * 999),
+                        x: gridP.x, y: gridP.y, oldX: gridP.x, oldY: gridP.y,
+                        baseX: gridP.x, baseY: gridP.y, fixed: false
+                    };
+                    state.nodes.push(targetNode);
+                }
+            }
+
+            if (targetNode && targetNode !== startNode) {
+                const dist = Math.hypot(targetNode.x - startNode.x, targetNode.y - startNode.y);
+                const duplicate = state.beams.some(b =>
+                    (b.a === startNode && b.b === targetNode) || (b.a === targetNode && b.b === startNode)
+                );
+                if (!duplicate && dist >= 0.4 && dist <= mat.maxLength) {
+                    state.beams.push({
+                        a: startNode,
+                        b: targetNode,
+                        mat: state.selectedMaterial,
+                        restLen: dist,
+                        origLen: dist,
+                        stress: 0,
+                        broken: false
+                    });
+                    audio.playClick(620);
+                    pushUndoState();
+                }
+            }
+        }
+
+        state.pointer.active = false;
+        state.pointer.dragStartNode = null;
+        state.pointer.snapNode = null;
+        state.pointer.panning = false;
+        state.pointer.pinching = false;
+    }
+
+    canvas.addEventListener("mousedown", e => onPointerDown(e.clientX, e.clientY, false, e.button));
+    window.addEventListener("mousemove", e => onPointerMove(e.clientX, e.clientY));
+    window.addEventListener("mouseup", () => onPointerUp());
+    canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+    canvas.addEventListener("touchstart", e => {
+        e.preventDefault();
+        audio.unlock();
+        if (e.touches.length === 2) {
+            state.pointer.pinching = true;
+            state.pointer.dragStartNode = null;
+            state.pointer.panning = false;
+            const t0 = e.touches[0];
+            const t1 = e.touches[1];
+            state.pointer.lastPinchDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY) || 1;
+            state.pointer.lastPinchMidX = (t0.clientX + t1.clientX) * 0.5;
+            state.pointer.lastPinchMidY = (t0.clientY + t1.clientY) * 0.5;
+            return;
+        }
+        if (e.touches.length === 1) {
+            const t = e.touches[0];
+            onPointerDown(t.clientX, t.clientY, true, 0);
+        }
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", e => {
+        e.preventDefault();
+        if (e.touches.length === 2 && state.pointer.pinching) {
+            const t0 = e.touches[0];
+            const t1 = e.touches[1];
+            const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY) || 1;
+            const midX = (t0.clientX + t1.clientX) * 0.5;
+            const midY = (t0.clientY + t1.clientY) * 0.5;
+
+            const scaleFactor = dist / state.pointer.lastPinchDist;
+            state.cam.scale = Math.max(16, Math.min(72, state.cam.scale * scaleFactor));
+            state.cam.x -= (midX - state.pointer.lastPinchMidX) / state.cam.scale;
+            state.cam.y -= (midY - state.pointer.lastPinchMidY) / state.cam.scale;
+
+            state.pointer.lastPinchDist = dist;
+            state.pointer.lastPinchMidX = midX;
+            state.pointer.lastPinchMidY = midY;
+            return;
+        }
+        if (e.touches.length === 1 && !state.pointer.pinching) {
+            const t = e.touches[0];
+            onPointerMove(t.clientX, t.clientY);
+        }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", e => {
+        e.preventDefault();
+        if (e.touches.length === 0) {
+            onPointerUp();
+        }
+    }, { passive: false });
+
+    canvas.addEventListener("wheel", e => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        state.cam.scale = Math.max(16, Math.min(72, state.cam.scale * factor));
+    }, { passive: false });
+
+    window.addEventListener("keydown", e => {
+        if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+        if (e.code === "Space") {
+            e.preventDefault();
+            if (state.mode === "BUILD") startSimulation();
+            else stopSimulation();
+        } else if ((e.key === "z" || e.key === "Z") && !e.shiftKey) {
+            triggerUndo();
+        } else if (e.key === "y" || e.key === "Y" || ((e.key === "z" || e.key === "Z") && e.shiftKey)) {
+            triggerRedo();
+        } else if (["1", "2", "3", "4", "5"].includes(e.key)) {
+            const keys = ["road", "wood", "steel", "cable", "piston"];
+            selectMaterial(keys[parseInt(e.key, 10) - 1]);
+        }
+    });
+
+    /**
+     * =========================================================================
+     * 8. UI WIRING, ONBOARDING GUIDE, MULTIPLAYER & MODAL CONTROLLERS
+     * =========================================================================
+     */
+    let toastTimeout = null;
+    function showToast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => el.classList.remove("show"), 2700);
+    }
+
+    function selectMaterial(matKey) {
+        state.selectedMaterial = matKey;
+        document.querySelectorAll(".mat-btn").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.mat === matKey);
+        });
+        if (saveRoot.settings) {
+            saveRoot.settings.selectedMaterial = matKey;
+            persistSaveData();
+        }
+        audio.playClick(540);
+    }
+
+    function triggerUndo() {
+        if (state.mode !== "BUILD" || state.undoStack.length <= 1) return;
+        const cur = state.undoStack.pop();
+        state.redoStack.push(cur);
+        const prev = JSON.parse(state.undoStack[state.undoStack.length - 1]);
+        restoreBlueprint(prev, false);
+        saveCurrentBlueprintToSlot();
+        audio.playClick(420);
+    }
+
+    function triggerRedo() {
+        if (state.mode !== "BUILD" || state.redoStack.length === 0) return;
+        const nextStr = state.redoStack.pop();
+        state.undoStack.push(nextStr);
+        restoreBlueprint(JSON.parse(nextStr), false);
+        saveCurrentBlueprintToSlot();
+        audio.playClick(580);
+    }
+
+    function updateHUD() {
+        const lvl = state.currentLevel;
+        const slot = getActiveSlot();
+        if (!lvl || !slot) return;
+
+        document.getElementById("hudLevelTitle").textContent = lvl.title;
+        const activeName = slot.multiplayer
+            ? `P${state.activeTurn}: ${state.activeTurn === 1 ? slot.playerName : slot.player2Name}`
+            : slot.playerName;
+        document.getElementById("hudPlayerBadge").textContent = activeName;
+
+        const spent = calculateTotalCost();
+        const remaining = lvl.budget - spent;
+        const budgetEl = document.getElementById("hudBudget");
+        budgetEl.textContent = `$${remaining.toLocaleString()}`;
+        budgetEl.classList.toggle("over", remaining < 0);
+
+        const barEl = document.getElementById("hudBudgetBar");
+        if (barEl) {
+            const pctLeft = Math.max(0, Math.min(100, (remaining / lvl.budget) * 100));
+            barEl.style.width = `${pctLeft}%`;
+            barEl.style.background = remaining < 0 ? "#ef4444" : (pctLeft < 25 ? "#f59e0b" : "#10b981");
+        }
+
+        const livePct = Math.min(100, Math.round(state.liveStress * 100));
+        const peakPct = Math.min(100, Math.round(state.peakStress * 100));
+        const liveCol = state.mode === "BUILD" ? "#10b981" : getStressColor(state.liveStress, "#10b981");
+        const peakCol = peakPct > 0 ? getStressColor(state.peakStress, "#10b981") : "#f8fafc";
+
+        const liveEl = document.getElementById("hudLiveStress");
+        const peakEl = document.getElementById("hudPeakStress");
+        const dotEl = document.getElementById("hudStressDot");
+        liveEl.textContent = `${livePct}%`;
+        liveEl.style.color = liveCol;
+        peakEl.textContent = `${peakPct}%`;
+        peakEl.style.color = peakCol;
+        dotEl.style.background = liveCol;
+        dotEl.style.boxShadow = `0 0 8px ${liveCol}`;
+
+        // Update live mission briefing pill
+        const trafficNames = lvl.vehicles.map(v => v.label || v.type.toUpperCase()).join(" + ");
+        document.getElementById("briefingTraffic").textContent = `🚚 ${trafficNames}`;
+        document.getElementById("briefingWind").textContent = lvl.wind > 0
+            ? `💨 Wind ${Math.round(lvl.wind * 100)} km/h`
+            : "🍃 Calm Wind";
+
+        const simBtn = document.getElementById("btnSimToggle");
+        const speedBtn = document.getElementById("btnSpeedToggle");
+        const bottomHud = document.getElementById("hud-bottom");
+        const stressLegend = document.getElementById("stress-legend-bar");
+
+        if (state.mode === "BUILD") {
+            simBtn.textContent = "▶ GO";
+            simBtn.className = "btn btn-go";
+            speedBtn.style.display = "none";
+            bottomHud.style.display = "flex";
+            stressLegend.style.display = "none";
+        } else {
+            simBtn.textContent = "■ EDIT";
+            simBtn.className = "btn btn-stop";
+            speedBtn.style.display = "inline-flex";
+            speedBtn.textContent = `${state.simSpeed}x`;
+            bottomHud.style.display = "none";
+            stressLegend.style.display = state.showStress ? "flex" : "none";
+        }
+
+        document.getElementById("btnUndo").disabled = state.undoStack.length <= 1;
+        document.getElementById("btnRedo").disabled = state.redoStack.length === 0;
+    }
+
+    function renderMenuModal() {
+        const slot = getActiveSlot();
+        document.getElementById("playerNameInput").value = slot.playerName;
+        document.getElementById("player2NameInput").value = slot.player2Name || "Co-Engineer";
+
+        document.getElementById("btnModeSingle").style.borderColor = !slot.multiplayer ? "var(--accent)" : "var(--panel-border)";
+        document.getElementById("btnModeMulti").style.borderColor = slot.multiplayer ? "var(--accent)" : "var(--panel-border)";
+        document.getElementById("player2Row").style.display = slot.multiplayer ? "flex" : "none";
+
+        const grid = document.getElementById("levelGrid");
+        grid.innerHTML = "";
+        CAMPAIGN_LEVELS.forEach((lvl, idx) => {
+            const prog = slot.levelProgress[lvl.id] || { stars: 0, bestScore: 0 };
+            const card = document.createElement("div");
+            card.className = "level-card" + (state.gameType === "CAMPAIGN" && slot.currentLevelIdx === idx ? " active" : "");
+            const starsStr = "★".repeat(prog.stars) + "☆".repeat(3 - prog.stars);
+            card.innerHTML = `
+                ${lvl.thumbSvg}
+                <div class="level-card-body">
+                    <div style="font-size:13px; font-weight:800;">${lvl.title}</div>
+                    <div class="stars-row">${starsStr}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Budget: $${lvl.budget.toLocaleString()}</div>
+                </div>
+            `;
+            card.onclick = () => {
+                state.gameType = "CAMPAIGN";
+                slot.currentLevelIdx = idx;
+                state.activeTurn = 1;
+                state.p1TurnResult = null;
+                persistSaveData();
+                initLevel(false);
+                document.getElementById("menuModal").classList.remove("open");
+                showToast(lvl.subtitle);
+            };
+            grid.appendChild(card);
+        });
+
+        const slotsEl = document.getElementById("saveSlotsList");
+        slotsEl.innerHTML = "";
+        saveRoot.slots.forEach(s => {
+            const totalStars = Object.values(s.levelProgress).reduce((acc, p) => acc + (p.stars || 0), 0);
+            const row = document.createElement("div");
+            row.className = "slot-item" + (s.id === slot.id ? " current" : "");
+            row.innerHTML = `
+                <div>
+                    <div style="font-size:13px; font-weight:800;">${escapeHtml(s.playerName)} ${s.multiplayer ? "& " + escapeHtml(s.player2Name) : ""}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">★ ${totalStars}/18 Stars • Wave ${s.endlessWave || 1}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn ${s.id === slot.id ? "btn-primary" : ""}" data-act="load">${s.id === slot.id ? "Active" : "Load"}</button>
+                    ${saveRoot.slots.length > 1 ? `<button class="btn" data-act="del" style="color:var(--danger);">✕</button>` : ""}
+                </div>
+            `;
+            row.querySelector('[data-act="load"]').onclick = () => {
+                saveRoot.activeSlotId = s.id;
+                persistSaveData();
+                initLevel(false);
+                renderMenuModal();
+                showToast(`Loaded profile: ${s.playerName}`);
+            };
+            const delBtn = row.querySelector('[data-act="del"]');
+            if (delBtn) {
+                delBtn.onclick = () => {
+                    saveRoot.slots = saveRoot.slots.filter(item => item.id !== s.id);
+                    if (saveRoot.activeSlotId === s.id) saveRoot.activeSlotId = saveRoot.slots[0].id;
+                    persistSaveData();
+                    renderMenuModal();
+                };
+            }
+            slotsEl.appendChild(row);
+        });
+    }
+
+    function showResultModal(spent, score, stars, mastery) {
+        const slot = getActiveSlot();
+        document.getElementById("resultTitle").textContent = state.gameType === "ENDLESS"
+            ? `Wave ${slot.endlessWave - 1} Cleared!`
+            : `${state.currentLevel.title} Complete!`;
+        const starsHtml = Array.from({ length: 3 }, (_, i) =>
+            i < stars
+                ? `<span class="star-earned">★</span>`
+                : `<span class="star-empty">☆</span>`
+        ).join("");
+        document.getElementById("resultStars").innerHTML = starsHtml;
+        document.getElementById("resultSubtitle").textContent = mastery
+            ? "Structural Mastery Bonus (+500 pts): Survived extreme >90% load!"
+            : "Bridge held under dynamic load!";
+        document.getElementById("resBudget").textContent = `$${spent.toLocaleString()}`;
+        document.getElementById("resStress").textContent = `${Math.round(state.peakStress * 100)}%`;
+        document.getElementById("resScore").textContent = score.toLocaleString();
+
+        const mpBox = document.getElementById("multiplayerComparison");
+        const nextBtn = document.getElementById("btnResultNext");
+
+        if (slot.multiplayer && state.gameType === "CAMPAIGN") {
+            mpBox.style.display = "block";
+            if (state.activeTurn === 1) {
+                state.p1TurnResult = { name: slot.playerName, score, spent, stars };
+                mpBox.innerHTML = `<strong>${escapeHtml(slot.playerName)}</strong> scored <strong>${score}</strong>! Hand device to <strong>${escapeHtml(slot.player2Name)}</strong> to beat this design.`;
+                nextBtn.textContent = `Start ${slot.player2Name}'s Turn ▶`;
+            } else {
+                const p1 = state.p1TurnResult || { name: slot.playerName, score: 0 };
+                const winner = score > p1.score ? slot.player2Name : (score < p1.score ? p1.name : "Tie Game");
+                mpBox.innerHTML = `
+                    <div>${escapeHtml(p1.name)}: <strong>${p1.score} pts</strong> | ${escapeHtml(slot.player2Name)}: <strong>${score} pts</strong></div>
+                    <div style="color:var(--success); font-weight:800; margin-top:4px;">🏆 Round Winner: ${escapeHtml(winner)}!</div>
+                `;
+                nextBtn.textContent = "Next Level ▶";
+            }
+        } else {
+            mpBox.style.display = "none";
+            nextBtn.textContent = state.gameType === "ENDLESS" ? "Next Wave ▶" : "Next Level ▶";
+        }
+
+        document.getElementById("resultModal").classList.add("open");
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+
+    function openIntroModal() {
+        const chkIntro = document.getElementById("chkShowIntroEveryTime");
+        if (chkIntro && saveRoot.settings) {
+            chkIntro.checked = saveRoot.settings.showIntroEveryTime !== false;
+        }
+        document.getElementById("introModal").classList.add("open");
+    }
+
+    // Attach DOM Event Listeners
+    document.querySelectorAll(".mat-btn").forEach(btn => {
+        btn.addEventListener("click", () => selectMaterial(btn.dataset.mat));
+    });
+
+    document.getElementById("btnSimToggle").addEventListener("click", () => {
+        if (state.mode === "BUILD") startSimulation();
+        else stopSimulation();
+    });
+
+    document.getElementById("btnSpeedToggle").addEventListener("click", () => {
+        state.simSpeed = state.simSpeed === 1 ? 2 : 1;
+        if (saveRoot.settings) {
+            saveRoot.settings.simSpeed = state.simSpeed;
+            persistSaveData();
+        }
+        updateHUD();
+        audio.playClick(640);
+    });
+
+    document.getElementById("btnUndo").addEventListener("click", triggerUndo);
+    document.getElementById("btnRedo").addEventListener("click", triggerRedo);
+    document.getElementById("btnTriangulate").addEventListener("click", applyAutoTriangulate);
+    document.getElementById("btnAutoDeck").addEventListener("click", applyAutoDeck);
+    document.getElementById("btnResetCam").addEventListener("click", () => {
+        fitCameraToLevel();
+        audio.playClick(520);
+        showToast("Camera centered");
+    });
+    document.getElementById("btnClear").addEventListener("click", () => {
+        if (state.mode !== "BUILD") return;
+        state.nodes = state.nodes.filter(n => n.fixed);
+        state.beams = [];
+        pushUndoState();
+        audio.playClick(300);
+        showToast("Bridge cleared");
+    });
+    document.getElementById("btnStressToggle").addEventListener("click", (e) => {
+        state.showStress = !state.showStress;
+        e.currentTarget.classList.toggle("active-toggle", state.showStress);
+        if (saveRoot.settings) {
+            saveRoot.settings.showStress = state.showStress;
+            persistSaveData();
+        }
+        updateHUD();
+        showToast(`Stress overlay: ${state.showStress ? "ON" : "OFF"}`);
+    });
+
+    document.getElementById("btnMute").addEventListener("click", () => {
+        const m = audio.toggleMute();
+        showToast(m ? "Audio Muted" : "Audio Enabled");
+    });
+
+    document.getElementById("btnMenu").addEventListener("click", () => {
+        if (state.mode !== "BUILD") stopSimulation();
+        renderMenuModal();
+        document.getElementById("menuModal").classList.add("open");
+    });
+
+    document.getElementById("btnHelp").addEventListener("click", () => {
+        openIntroModal();
+    });
+
+    document.getElementById("btnOpenGuideFromMenu").addEventListener("click", () => {
+        document.getElementById("menuModal").classList.remove("open");
+        openIntroModal();
+    });
+
+    document.getElementById("chkShowIntroEveryTime").addEventListener("change", (e) => {
+        if (saveRoot.settings) {
+            saveRoot.settings.showIntroEveryTime = e.target.checked;
+            persistSaveData();
+        }
+    });
+
+    function dismissIntro() {
+        const slot = getActiveSlot();
+        const chkIntro = document.getElementById("chkShowIntroEveryTime");
+        if (saveRoot.settings && chkIntro) {
+            saveRoot.settings.showIntroEveryTime = chkIntro.checked;
+        }
+        if (slot) {
+            slot.seenIntro = true;
+        }
+        persistSaveData();
+        document.getElementById("introModal").classList.remove("open");
+    }
+
+    document.getElementById("btnCloseIntro").addEventListener("click", dismissIntro);
+    document.getElementById("btnStartFromIntro").addEventListener("click", () => {
+        dismissIntro();
+        document.getElementById("menuModal").classList.remove("open");
+        showToast("Drag from a red anchor to build your bridge!");
+    });
+
+    document.getElementById("btnCloseMenu").addEventListener("click", () => {
+        document.getElementById("menuModal").classList.remove("open");
+    });
+
+    document.getElementById("btnCheckUpdate").addEventListener("click", () => checkForUpdates(true));
+
+    document.getElementById("btnConfirmName").addEventListener("click", () => {
+        const val = document.getElementById("playerNameInput").value.trim() || "Chief Engineer";
+        const slot = getActiveSlot();
+        slot.playerName = val;
+        persistSaveData();
+        updateHUD();
+        renderMenuModal();
+        const status = document.getElementById("nameConfirmStatus");
+        status.textContent = `✓ Confirmed: ${val}`;
+        audio.playClick(680);
+        showToast(`Engineer set to ${val}`);
+    });
+
+    document.getElementById("btnConfirmP2").addEventListener("click", () => {
+        const val = document.getElementById("player2NameInput").value.trim() || "Co-Engineer";
+        const slot = getActiveSlot();
+        slot.player2Name = val;
+        persistSaveData();
+        updateHUD();
+        renderMenuModal();
+        audio.playClick(680);
+        showToast(`Player 2 set to ${val}`);
+    });
+
+    document.getElementById("btnModeSingle").addEventListener("click", () => {
+        const slot = getActiveSlot();
+        slot.multiplayer = false;
+        state.activeTurn = 1;
+        persistSaveData();
+        renderMenuModal();
+        updateHUD();
+    });
+
+    document.getElementById("btnModeMulti").addEventListener("click", () => {
+        const slot = getActiveSlot();
+        slot.multiplayer = true;
+        state.activeTurn = 1;
+        persistSaveData();
+        renderMenuModal();
+        updateHUD();
+    });
+
+    document.getElementById("btnStartEndless").addEventListener("click", () => {
+        state.gameType = "ENDLESS";
+        initLevel(false);
+        document.getElementById("menuModal").classList.remove("open");
+        showToast("Endless Canyon: Survive each wave & reinforce!");
+    });
+
+    document.getElementById("btnNewSaveSlot").addEventListener("click", () => {
+        const newSlot = createDefaultSlot(`Engineer #${saveRoot.slots.length + 1}`);
+        saveRoot.slots.push(newSlot);
+        saveRoot.activeSlotId = newSlot.id;
+        persistSaveData();
+        initLevel(false);
+        renderMenuModal();
+        showToast("Created new save slot");
+    });
+
+    document.getElementById("btnResultBuild").addEventListener("click", () => {
+        document.getElementById("resultModal").classList.remove("open");
+        stopSimulation();
+    });
+
+    document.getElementById("btnResultNext").addEventListener("click", () => {
+        document.getElementById("resultModal").classList.remove("open");
+        const slot = getActiveSlot();
+        if (slot.multiplayer && state.gameType === "CAMPAIGN" && state.activeTurn === 1) {
+            state.activeTurn = 2;
+            state.nodes = state.nodes.filter(n => n.fixed);
+            state.beams = [];
+            state.undoStack = [JSON.stringify(serializeBlueprint())];
+            stopSimulation();
+            showToast(`${slot.player2Name}'s turn! Build your bridge.`);
+            return;
+        }
+
+        state.activeTurn = 1;
+        state.p1TurnResult = null;
+        if (state.gameType === "ENDLESS") {
+            initLevel(true);
+        } else {
+            slot.currentLevelIdx = (slot.currentLevelIdx + 1) % CAMPAIGN_LEVELS.length;
+            persistSaveData();
+            initLevel(false);
+        }
+    });
+
+    /**
+     * =========================================================================
+     * 9. MAIN DETERMINISTIC LOOP & BOOTSTRAP
+     * =========================================================================
+     */
+    let lastFrameTime = performance.now();
+    let accumulator = 0;
+
+    function mainLoop(now) {
+        const frameDt = Math.min(0.05, (now - lastFrameTime) / 1000);
+        lastFrameTime = now;
+
+        if (state.mode === "SIM" || state.mode === "FAIL_SLOWMO") {
+            const speedMult = state.mode === "SIM" ? state.simSpeed : 1;
+            accumulator += frameDt * speedMult;
+            while (accumulator >= FIXED_DT) {
+                stepPhysics(FIXED_DT);
+                accumulator -= FIXED_DT;
+            }
+            updateHUD();
+        }
+
+        updateParticles(frameDt);
+        renderFrame();
+        requestAnimationFrame(mainLoop);
+    }
+
+    window.addEventListener("resize", () => fitCameraToLevel());
+
+    window.onload = () => {
+        loadSaveData();
+        applySavedUserSettings();
+        initLevel(false);
+        renderMenuModal();
+        const slot = getActiveSlot();
+        const shouldShowIntro = (saveRoot.settings && saveRoot.settings.showIntroEveryTime !== false) || (slot && !slot.seenIntro);
+        if (shouldShowIntro) {
+            openIntroModal();
+        }
+        checkForUpdates(false);
+        requestAnimationFrame(mainLoop);
+    };
+})();
+</script>
+</body>
+</html>

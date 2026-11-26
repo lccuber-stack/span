@@ -7,10 +7,138 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SPAN">
     <meta name="theme-color" content="#070c18">
-    <link id="appleTouchIcon" rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%230f172a'/%3E%3Cstop offset='100%25' stop-color='%23020617'/%3E%3C/linearGradient%3E%3ClinearGradient id='cable' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='50%25' stop-color='%23facc15'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23bg)'/%3E%3Crect x='118' y='118' width='22' height='214' rx='6' fill='%2338bdf8'/%3E%3Crect x='372' y='118' width='22' height='214' rx='6' fill='%2338bdf8'/%3E%3Cpath d='M 36 320 Q 82 270 129 126 Q 256 305 383 126 Q 430 270 476 320' fill='none' stroke='url(%23cable)' stroke-width='14' stroke-linecap='round'/%3E%3Cline x1='180' y1='218' x2='180' y2='320' stroke='%2394a3b8' stroke-width='5'/%3E%3Cline x1='256' y1='254' x2='256' y2='320' stroke='%2394a3b8' stroke-width='5'/%3E%3Cline x1='332' y1='218' x2='332' y2='320' stroke='%2394a3b8' stroke-width='5'/%3E%3Cline x1='32' y1='320' x2='480' y2='320' stroke='%23f8fafc' stroke-width='18' stroke-linecap='round'/%3E%3Crect x='214' y='282' width='76' height='26' rx='8' fill='%2310b981'/%3E%3Ccircle cx='232' cy='310' r='9' fill='%230f172a' stroke='%23e2e8f0' stroke-width='3'/%3E%3Ccircle cx='272' cy='310' r='9' fill='%230f172a' stroke='%23e2e8f0' stroke-width='3'/%3E%3Ctext x='256' y='438' text-anchor='middle' fill='%23f8fafc' font-family='-apple-system,BlinkMacSystemFont,sans-serif' font-weight='900' font-size='78' letter-spacing='4'%3ESPAN%3C/text%3E%3C/svg%3E">
-    <link id="appFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%230f172a'/%3E%3Cstop offset='100%25' stop-color='%23020617'/%3E%3C/linearGradient%3E%3ClinearGradient id='cable' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='50%25' stop-color='%23facc15'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23bg)'/%3E%3Crect x='118' y='118' width='22' height='214' rx='6' fill='%2338bdf8'/%3E%3Crect x='372' y='118' width='22' height='214' rx='6' fill='%2338bdf8'/%3E%3Cpath d='M 36 320 Q 82 270 129 126 Q 256 305 383 126 Q 430 270 476 320' fill='none' stroke='url(%23cable)' stroke-width='14' stroke-linecap='round'/%3E%3Cline x1='180' y1='218' x2='180' y2='320' stroke='%2394a3b8' stroke-width='5'/%3E%3Cline x1='256' y1='254' x2='256' y2='320' stroke='%2394a3b8' stroke-width='5'/%3E%3Cline x1='332' y1='218' x2='332' y2='320' stroke='%2394a3b8' stroke-width='5'/%3E%3Cline x1='32' y1='320' x2='480' y2='320' stroke='%23f8fafc' stroke-width='18' stroke-linecap='round'/%3E%3Crect x='214' y='282' width='76' height='26' rx='8' fill='%2310b981'/%3E%3Ccircle cx='232' cy='310' r='9' fill='%230f172a' stroke='%23e2e8f0' stroke-width='3'/%3E%3Ccircle cx='272' cy='310' r='9' fill='%230f172a' stroke='%23e2e8f0' stroke-width='3'/%3E%3Ctext x='256' y='438' text-anchor='middle' fill='%23f8fafc' font-family='-apple-system,BlinkMacSystemFont,sans-serif' font-weight='900' font-size='78' letter-spacing='4'%3ESPAN%3C/text%3E%3C/svg%3E">
-    <link id="appManifest" rel="manifest" href="">
     <title>SPAN — Structural Engineering & Bridge Physics</title>
+    <script>
+        // Synchronous 512x512 raster PNG icon generator in <head> so macOS Dock & iOS Home Screen
+        // immediately capture a genuine PNG apple-touch-icon instead of falling back to root domain icons.
+        (function generatePngAppIconsSync() {
+            try {
+                var c = document.createElement("canvas");
+                c.width = 512;
+                c.height = 512;
+                var ctx = c.getContext("2d");
+
+                // Deep architectural navy background
+                var bg = ctx.createLinearGradient(0, 0, 512, 512);
+                bg.addColorStop(0, "#172a4f");
+                bg.addColorStop(0.55, "#0b1428");
+                bg.addColorStop(1, "#030712");
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, 512, 512);
+
+                // Blueprint grid lines
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.14)";
+                ctx.lineWidth = 2;
+                for (var g = 64; g < 512; g += 64) {
+                    ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, 512); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(512, g); ctx.stroke();
+                }
+
+                // Twin suspension towers
+                ctx.fillStyle = "#38bdf8";
+                ctx.fillRect(114, 108, 22, 214);
+                ctx.fillRect(376, 108, 22, 214);
+
+                // Golden-cyan catenary suspension cable
+                var cable = ctx.createLinearGradient(34, 0, 478, 0);
+                cable.addColorStop(0, "#38bdf8");
+                cable.addColorStop(0.5, "#facc15");
+                cable.addColorStop(1, "#38bdf8");
+                ctx.strokeStyle = cable;
+                ctx.lineWidth = 14;
+                ctx.lineCap = "round";
+                ctx.beginPath();
+                ctx.moveTo(34, 310);
+                ctx.quadraticCurveTo(80, 260, 125, 114);
+                ctx.quadraticCurveTo(256, 296, 387, 114);
+                ctx.quadraticCurveTo(432, 260, 478, 310);
+                ctx.stroke();
+
+                // Vertical suspender cables
+                ctx.strokeStyle = "rgba(203, 213, 225, 0.85)";
+                ctx.lineWidth = 5;
+                [176, 216, 256, 296, 336].forEach(function(x) {
+                    var t = (x - 125) / (387 - 125);
+                    var cy = (1 - t) * (1 - t) * 114 + 2 * (1 - t) * t * 296 + t * t * 114;
+                    ctx.beginPath();
+                    ctx.moveTo(x, cy + 4);
+                    ctx.lineTo(x, 306);
+                    ctx.stroke();
+                });
+
+                // Crisp road deck
+                ctx.strokeStyle = "#f8fafc";
+                ctx.lineWidth = 16;
+                ctx.beginPath();
+                ctx.moveTo(32, 310);
+                ctx.lineTo(480, 310);
+                ctx.stroke();
+
+                // Emerald vehicle on deck
+                ctx.fillStyle = "#10b981";
+                ctx.fillRect(216, 274, 72, 24);
+                [234, 270].forEach(function(wx) {
+                    ctx.fillStyle = "#0f172a";
+                    ctx.beginPath();
+                    ctx.arc(wx, 300, 9, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#f8fafc";
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                });
+
+                // Water reflection accent
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.65)";
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(74, 346);
+                ctx.lineTo(438, 346);
+                ctx.stroke();
+
+                // Bold SPAN wordmark
+                ctx.fillStyle = "#f8fafc";
+                ctx.font = "900 78px -apple-system, BlinkMacSystemFont, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("SPAN", 256, 442);
+
+                var pngUrl = c.toDataURL("image/png");
+                window.__SPAN_ICON_PNG__ = pngUrl;
+
+                var head = document.head;
+                var linkSpecs = [
+                    { rel: "apple-touch-icon", sizes: "180x180", href: pngUrl },
+                    { rel: "apple-touch-icon", sizes: "512x512", href: pngUrl },
+                    { rel: "apple-touch-icon-precomposed", sizes: "180x180", href: pngUrl },
+                    { rel: "icon", type: "image/png", sizes: "512x512", href: pngUrl },
+                    { rel: "shortcut icon", type: "image/png", href: pngUrl }
+                ];
+                linkSpecs.forEach(function(spec) {
+                    var el = document.createElement("link");
+                    Object.keys(spec).forEach(function(k) { el.setAttribute(k, spec[k]); });
+                    head.appendChild(el);
+                });
+
+                var manifestObj = {
+                    name: "SPAN — Structural Engineering & Bridge Physics",
+                    short_name: "SPAN",
+                    start_url: "./",
+                    display: "standalone",
+                    background_color: "#060b16",
+                    theme_color: "#070c18",
+                    icons: [
+                        { src: pngUrl, sizes: "512x512", type: "image/png", purpose: "any" },
+                        { src: pngUrl, sizes: "192x192", type: "image/png", purpose: "any" }
+                    ]
+                };
+                var mLink = document.createElement("link");
+                mLink.rel = "manifest";
+                mLink.href = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifestObj));
+                head.appendChild(mLink);
+            } catch (err) {
+                console.warn("Head PNG icon init:", err);
+            }
+        })();
+    </script>
     <style>
         :root {
             --bg-dark: #060b16;
@@ -1059,140 +1187,14 @@
 
     /**
      * =========================================================================
-     * 1. APP VERSIONING, PWA ICON INJECTION & SELF-UPDATE SYSTEM
+     * 1. APP VERSIONING & SELF-UPDATE SYSTEM
      * =========================================================================
      */
-    const APP_VERSION = "v1.5.1";
+    const APP_VERSION = "v1.5.2";
     const STORAGE_KEY = "SPAN_SAVE_DATA_V1";
 
     document.getElementById("introVersionBadge").textContent = APP_VERSION;
     document.getElementById("menuVersionBadge").textContent = APP_VERSION;
-
-    // Generate high-res 512x512 PNG app icon via offscreen Canvas and bind to Apple Touch Icon, Favicon & Web Manifest
-    function injectAppIcons() {
-        try {
-            const c = document.createElement("canvas");
-            c.width = 512;
-            c.height = 512;
-            const ctx = c.getContext("2d");
-
-            // Rich deep-navy metallic background
-            const grad = ctx.createLinearGradient(0, 0, 512, 512);
-            grad.addColorStop(0, "#13223f");
-            grad.addColorStop(0.55, "#0a1224");
-            grad.addColorStop(1, "#030712");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 512, 512);
-
-            // Subtle architectural blueprint grid
-            ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
-            ctx.lineWidth = 2;
-            for (let i = 64; i < 512; i += 64) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
-            }
-
-            // Twin Suspension Towers
-            ctx.fillStyle = "#38bdf8";
-            ctx.beginPath();
-            ctx.roundRect(114, 114, 22, 214, 6);
-            ctx.roundRect(376, 114, 22, 214, 6);
-            ctx.fill();
-
-            // Golden-Cyan Catenary Suspension Cables
-            const cableGrad = ctx.createLinearGradient(36, 0, 476, 0);
-            cableGrad.addColorStop(0, "#38bdf8");
-            cableGrad.addColorStop(0.5, "#facc15");
-            cableGrad.addColorStop(1, "#38bdf8");
-            ctx.strokeStyle = cableGrad;
-            ctx.lineWidth = 13;
-            ctx.lineCap = "round";
-            ctx.beginPath();
-            ctx.moveTo(36, 316);
-            ctx.quadraticCurveTo(80, 266, 125, 122);
-            ctx.quadraticCurveTo(256, 300, 387, 122);
-            ctx.quadraticCurveTo(432, 266, 476, 316);
-            ctx.stroke();
-
-            // Vertical Suspender Rods
-            ctx.strokeStyle = "rgba(148, 163, 184, 0.85)";
-            ctx.lineWidth = 5;
-            [176, 216, 256, 296, 336].forEach(x => {
-                const t = (x - 125) / (387 - 125);
-                const cableY = (1 - t) * (1 - t) * 122 + 2 * (1 - t) * t * 300 + t * t * 122;
-                ctx.beginPath();
-                ctx.moveTo(x, cableY + 4);
-                ctx.lineTo(x, 312);
-                ctx.stroke();
-            });
-
-            // Main Road Deck
-            ctx.strokeStyle = "#f8fafc";
-            ctx.lineWidth = 16;
-            ctx.beginPath();
-            ctx.moveTo(34, 316);
-            ctx.lineTo(478, 316);
-            ctx.stroke();
-
-            // Emerald EV Crossing the Span
-            ctx.fillStyle = "#10b981";
-            ctx.beginPath();
-            ctx.roundRect(214, 280, 74, 24, 7);
-            ctx.fill();
-            [232, 270].forEach(wx => {
-                ctx.fillStyle = "#0f172a";
-                ctx.beginPath();
-                ctx.arc(wx, 306, 8, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = "#e2e8f0";
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-            });
-
-            // Water Reflection Line
-            ctx.strokeStyle = "rgba(56, 189, 248, 0.55)";
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(76, 352);
-            ctx.lineTo(436, 352);
-            ctx.stroke();
-
-            // Bold App Title
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "900 76px -apple-system, BlinkMacSystemFont, sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("SPAN", 256, 444);
-
-            const pngDataUrl = c.toDataURL("image/png");
-
-            const appleEl = document.getElementById("appleTouchIcon");
-            if (appleEl) appleEl.href = pngDataUrl;
-
-            const favEl = document.getElementById("appFavicon");
-            if (favEl) favEl.href = pngDataUrl;
-
-            // Inject dynamic Web App Manifest for macOS Dock & iOS/Android PWA installation
-            const manifest = {
-                name: "SPAN — Structural Engineering & Bridge Physics",
-                short_name: "SPAN",
-                start_url: window.location.pathname || "./",
-                display: "standalone",
-                background_color: "#060b16",
-                theme_color: "#070c18",
-                icons: [
-                    { src: pngDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" },
-                    { src: pngDataUrl, sizes: "192x192", type: "image/png" }
-                ]
-            };
-            const manifestEl = document.getElementById("appManifest");
-            if (manifestEl) {
-                manifestEl.href = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifest));
-            }
-        } catch (e) {
-            console.warn("Icon generation skipped:", e);
-        }
-    }
-    injectAppIcons();
 
     async function checkForUpdates(manual = false) {
         try {

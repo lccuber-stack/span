@@ -9,8 +9,8 @@
     <meta name="theme-color" content="#070c18">
     <title>SPAN — Structural Engineering & Bridge Physics</title>
     <script>
-        // Synchronous 512x512 raster PNG icon generator in <head> so macOS Dock & iOS Home Screen
-        // immediately capture a genuine PNG apple-touch-icon instead of falling back to root domain icons.
+        // Synchronous 512x512 text-free raster PNG icon generator in <head> so macOS Dock & iOS Home Screen
+        // immediately capture a clean, pure-emblem PNG apple-touch-icon.
         (function generatePngAppIconsSync() {
             try {
                 var c = document.createElement("canvas");
@@ -18,88 +18,122 @@
                 c.height = 512;
                 var ctx = c.getContext("2d");
 
-                // Deep architectural navy background
+                // Deep architectural twilight backdrop
                 var bg = ctx.createLinearGradient(0, 0, 512, 512);
-                bg.addColorStop(0, "#172a4f");
-                bg.addColorStop(0.55, "#0b1428");
-                bg.addColorStop(1, "#030712");
+                bg.addColorStop(0, "#1e3a8a");
+                bg.addColorStop(0.5, "#0f172a");
+                bg.addColorStop(1, "#020617");
                 ctx.fillStyle = bg;
                 ctx.fillRect(0, 0, 512, 512);
 
-                // Blueprint grid lines
-                ctx.strokeStyle = "rgba(56, 189, 248, 0.14)";
+                // Subtle blueprint radial glow behind bridge
+                var glow = ctx.createRadialGradient(256, 230, 20, 256, 230, 240);
+                glow.addColorStop(0, "rgba(56, 189, 248, 0.28)");
+                glow.addColorStop(1, "rgba(15, 23, 42, 0)");
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, 512, 512);
+
+                // Subtle architectural grid
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.11)";
                 ctx.lineWidth = 2;
                 for (var g = 64; g < 512; g += 64) {
                     ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, 512); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(512, g); ctx.stroke();
                 }
 
-                // Twin suspension towers
-                ctx.fillStyle = "#38bdf8";
-                ctx.fillRect(114, 108, 22, 214);
-                ctx.fillRect(376, 108, 22, 214);
+                // Twin suspension pylons with tapered caps & cross-bracing
+                var towerGrad = ctx.createLinearGradient(0, 96, 0, 360);
+                towerGrad.addColorStop(0, "#7dd3fc");
+                towerGrad.addColorStop(0.5, "#0ea5e9");
+                towerGrad.addColorStop(1, "#0369a1");
+                ctx.fillStyle = towerGrad;
+                ctx.fillRect(114, 102, 26, 248);
+                ctx.fillRect(372, 102, 26, 248);
 
-                // Golden-cyan catenary suspension cable
-                var cable = ctx.createLinearGradient(34, 0, 478, 0);
+                // Tower top beacons
+                ctx.fillStyle = "#facc15";
+                ctx.beginPath(); ctx.arc(127, 98, 9, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(385, 98, 9, 0, Math.PI * 2); ctx.fill();
+
+                // Main golden-cyan catenary suspension cable
+                var cable = ctx.createLinearGradient(28, 0, 484, 0);
                 cable.addColorStop(0, "#38bdf8");
-                cable.addColorStop(0.5, "#facc15");
+                cable.addColorStop(0.5, "#fbbf24");
                 cable.addColorStop(1, "#38bdf8");
                 ctx.strokeStyle = cable;
-                ctx.lineWidth = 14;
+                ctx.lineWidth = 16;
                 ctx.lineCap = "round";
                 ctx.beginPath();
-                ctx.moveTo(34, 310);
-                ctx.quadraticCurveTo(80, 260, 125, 114);
-                ctx.quadraticCurveTo(256, 296, 387, 114);
-                ctx.quadraticCurveTo(432, 260, 478, 310);
+                ctx.moveTo(28, 316);
+                ctx.quadraticCurveTo(76, 258, 127, 104);
+                ctx.quadraticCurveTo(256, 294, 385, 104);
+                ctx.quadraticCurveTo(436, 258, 484, 316);
                 ctx.stroke();
 
                 // Vertical suspender cables
-                ctx.strokeStyle = "rgba(203, 213, 225, 0.85)";
+                ctx.strokeStyle = "rgba(226, 232, 240, 0.85)";
                 ctx.lineWidth = 5;
-                [176, 216, 256, 296, 336].forEach(function(x) {
-                    var t = (x - 125) / (387 - 125);
-                    var cy = (1 - t) * (1 - t) * 114 + 2 * (1 - t) * t * 296 + t * t * 114;
+                [172, 214, 256, 298, 340].forEach(function(x) {
+                    var t = (x - 127) / (385 - 127);
+                    var cy = (1 - t) * (1 - t) * 104 + 2 * (1 - t) * t * 294 + t * t * 104;
                     ctx.beginPath();
-                    ctx.moveTo(x, cy + 4);
-                    ctx.lineTo(x, 306);
+                    ctx.moveTo(x, cy + 5);
+                    ctx.lineTo(x, 312);
                     ctx.stroke();
                 });
 
-                // Crisp road deck
-                ctx.strokeStyle = "#f8fafc";
-                ctx.lineWidth = 16;
-                ctx.beginPath();
-                ctx.moveTo(32, 310);
-                ctx.lineTo(480, 310);
-                ctx.stroke();
-
-                // Emerald vehicle on deck
-                ctx.fillStyle = "#10b981";
-                ctx.fillRect(216, 274, 72, 24);
-                [234, 270].forEach(function(wx) {
-                    ctx.fillStyle = "#0f172a";
-                    ctx.beginPath();
-                    ctx.arc(wx, 300, 9, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = "#f8fafc";
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                });
-
-                // Water reflection accent
-                ctx.strokeStyle = "rgba(56, 189, 248, 0.65)";
+                // Geometric under-deck truss lattice
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.72)";
                 ctx.lineWidth = 6;
                 ctx.beginPath();
-                ctx.moveTo(74, 346);
-                ctx.lineTo(438, 346);
+                ctx.moveTo(127, 318);
+                ctx.lineTo(170, 354);
+                ctx.lineTo(213, 318);
+                ctx.lineTo(256, 354);
+                ctx.lineTo(299, 318);
+                ctx.lineTo(342, 354);
+                ctx.lineTo(385, 318);
                 ctx.stroke();
 
-                // Bold SPAN wordmark
-                ctx.fillStyle = "#f8fafc";
-                ctx.font = "900 78px -apple-system, BlinkMacSystemFont, sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("SPAN", 256, 442);
+                // Crisp white road deck
+                ctx.strokeStyle = "#f8fafc";
+                ctx.lineWidth = 18;
+                ctx.lineCap = "round";
+                ctx.beginPath();
+                ctx.moveTo(28, 316);
+                ctx.lineTo(484, 316);
+                ctx.stroke();
+
+                // Stylized emerald vehicle crossing the center span
+                ctx.fillStyle = "#10b981";
+                ctx.beginPath();
+                ctx.roundRect(216, 276, 80, 26, 8);
+                ctx.fill();
+                [236, 276].forEach(function(wx) {
+                    ctx.fillStyle = "#0f172a";
+                    ctx.beginPath();
+                    ctx.arc(wx, 304, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#f8fafc";
+                    ctx.lineWidth = 3.5;
+                    ctx.stroke();
+                });
+
+                // Stylized water reflection waves below bridge (zero text)
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.75)";
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(68, 394);
+                ctx.quadraticCurveTo(162, 382, 256, 394);
+                ctx.quadraticCurveTo(350, 406, 444, 394);
+                ctx.stroke();
+
+                ctx.strokeStyle = "rgba(125, 211, 252, 0.45)";
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(118, 426);
+                ctx.quadraticCurveTo(256, 416, 394, 426);
+                ctx.stroke();
 
                 var pngUrl = c.toDataURL("image/png");
                 window.__SPAN_ICON_PNG__ = pngUrl;
@@ -1190,7 +1224,7 @@
      * 1. APP VERSIONING & SELF-UPDATE SYSTEM
      * =========================================================================
      */
-    const APP_VERSION = "v1.5.2";
+    const APP_VERSION = "v1.5.3";
     const STORAGE_KEY = "SPAN_SAVE_DATA_V1";
 
     document.getElementById("introVersionBadge").textContent = APP_VERSION;

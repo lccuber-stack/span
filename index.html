@@ -637,11 +637,21 @@
             max-width: 760px;
             max-height: 88vh;
             overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            touch-action: pan-y;
             padding: 22px;
             box-shadow: 0 32px 72px rgba(0, 0, 0, 0.78);
             display: flex;
             flex-direction: column;
             gap: 16px;
+        }
+
+        .modal-card::-webkit-scrollbar,
+        .slot-list::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
         }
 
         .modal-header {
@@ -849,9 +859,10 @@
 
         .level-thumb {
             width: 100%;
-            height: 46px;
-            border-radius: 8px;
+            height: 62px;
+            border-radius: 10px;
             background: #080d1a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             overflow: hidden;
         }
 
@@ -861,6 +872,9 @@
             gap: 7px;
             max-height: 170px;
             overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            touch-action: pan-y;
         }
 
         .slot-item {
@@ -1294,7 +1308,7 @@
      * 1. APP VERSIONING & SELF-UPDATE SYSTEM
      * =========================================================================
      */
-    const APP_VERSION = "v6.0.0";
+    const APP_VERSION = "v6.1.0";
     const STORAGE_KEY = "SPAN_SAVE_DATA_V1";
 
     function updateVersionBadges() {
@@ -3312,98 +3326,303 @@
         const p = worldToScreen(v.x, v.y);
         const w = v.width * ppm;
         const h = v.height * ppm;
-        const wheelR = (v.style === "monster" ? 0.34 : v.style === "mining" ? 0.36 : 0.24) * ppm;
+        const wheelR = (v.style === "monster" ? 0.34 : v.style === "mining" ? 0.37 : 0.24) * ppm;
 
         ctx.save();
         ctx.translate(p.x, p.y - wheelR * 0.85);
         ctx.rotate(v.angle);
         if (v.dir === -1) ctx.scale(-1, 1);
 
+        // Ground Contact Shadow
+        ctx.fillStyle = "rgba(2, 6, 23, 0.34)";
+        ctx.beginPath();
+        ctx.ellipse(0, wheelR * 0.82, w * 0.48, wheelR * 0.24, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         if (v.style === "articulated") {
-            ctx.fillStyle = "#d97706";
+            // Heavy Chassis Frame
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(-w * 0.44, -h * 0.34, w * 0.88, h * 0.20);
+
+            // Rear Scow-End Dump Bed with Ribs & Quarry Rock Load
+            ctx.fillStyle = "#92400e";
             ctx.beginPath();
-            ctx.roundRect(-w * 0.48, -h * 0.98, w * 0.50, h * 0.65, 4);
-            ctx.fill();
-            ctx.fillStyle = "#78350f";
-            ctx.beginPath();
-            ctx.moveTo(-w * 0.44, -h * 0.98);
-            ctx.lineTo(-w * 0.04, -h * 0.98);
-            ctx.lineTo(-w * 0.10, -h * 0.62);
-            ctx.lineTo(-w * 0.38, -h * 0.62);
+            ctx.moveTo(-w * 0.44, -h * 0.88);
+            ctx.quadraticCurveTo(-w * 0.24, -h * 1.08, -w * 0.04, -h * 0.88);
             ctx.closePath();
             ctx.fill();
 
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(-w * 0.02, -h * 0.65, w * 0.14, h * 0.45);
-
-            ctx.fillStyle = v.color;
+            const bedGrad = ctx.createLinearGradient(0, -h * 1.0, 0, -h * 0.32);
+            bedGrad.addColorStop(0, "#fbbf24");
+            bedGrad.addColorStop(1, "#d97706");
+            ctx.fillStyle = bedGrad;
             ctx.beginPath();
-            ctx.roundRect(w * 0.10, -h * 1.05, w * 0.24, h * 0.85, 5);
+            ctx.moveTo(-w * 0.50, -h * 0.94);
+            ctx.lineTo(-w * 0.01, -h * 0.88);
+            ctx.lineTo(-w * 0.04, -h * 0.32);
+            ctx.lineTo(-w * 0.44, -h * 0.32);
+            ctx.closePath();
             ctx.fill();
-            ctx.fillStyle = v.cabinColor;
-            ctx.fillRect(w * 0.18, -h * 0.96, w * 0.13, h * 0.36);
 
+            // Dump Bed Structural Side Ribs
+            ctx.strokeStyle = "#b45309";
+            ctx.lineWidth = 2;
+            for (let r = 1; r <= 3; r++) {
+                const rx = -w * (0.44 - r * 0.10);
+                ctx.beginPath();
+                ctx.moveTo(rx, -h * 0.90);
+                ctx.lineTo(rx, -h * 0.34);
+                ctx.stroke();
+            }
+
+            // Central Articulation Pivot & Hydraulic Steering Cylinder
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(-w * 0.02, -h * 0.62, w * 0.14, h * 0.42);
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.02, -h * 0.46);
+            ctx.lineTo(w * 0.12, -h * 0.46);
+            ctx.stroke();
+
+            // Forward ROPS Cab
+            ctx.fillStyle = "#f59e0b";
+            ctx.beginPath();
+            ctx.roundRect(w * 0.10, -h * 1.04, w * 0.23, h * 0.82, [5, 5, 2, 2]);
+            ctx.fill();
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.roundRect(w * 0.17, -h * 0.95, w * 0.14, h * 0.36, 3);
+            ctx.fill();
+            ctx.fillStyle = "rgba(186, 230, 253, 0.55)";
+            ctx.fillRect(w * 0.19, -h * 0.92, w * 0.05, h * 0.30);
+
+            // Sloped Engine Hood & Radiator Grille
             ctx.fillStyle = "#d97706";
             ctx.beginPath();
-            ctx.roundRect(w * 0.32, -h * 0.72, w * 0.17, h * 0.52, 4);
+            ctx.moveTo(w * 0.32, -h * 0.74);
+            ctx.lineTo(w * 0.48, -h * 0.66);
+            ctx.lineTo(w * 0.48, -h * 0.24);
+            ctx.lineTo(w * 0.32, -h * 0.24);
+            ctx.closePath();
             ctx.fill();
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(w * 0.45, -h * 0.62, w * 0.04, h * 0.30);
+            ctx.fillStyle = "#fef08a";
+            ctx.fillRect(w * 0.46, -h * 0.58, 3, 5);
         } else if (v.style === "mining") {
-            ctx.fillStyle = v.color;
+            // Giant Ultra-Class Mining Haul Truck
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(-w * 0.42, -h * 0.36, w * 0.84, h * 0.22);
+
+            // Massive Angled Rock Body + Canopy Overhang
+            const mineGrad = ctx.createLinearGradient(0, -h * 1.15, 0, -h * 0.25);
+            mineGrad.addColorStop(0, "#fde047");
+            mineGrad.addColorStop(1, "#ca8a04");
+            ctx.fillStyle = mineGrad;
             ctx.beginPath();
-            ctx.moveTo(-w * 0.48, -h * 0.92);
-            ctx.lineTo(w * 0.48, -h * 1.12);
-            ctx.lineTo(w * 0.44, -h * 0.25);
-            ctx.lineTo(-w * 0.42, -h * 0.25);
+            ctx.moveTo(-w * 0.48, -h * 0.94);
+            ctx.lineTo(w * 0.49, -h * 1.16);
+            ctx.lineTo(w * 0.49, -h * 1.04);
+            ctx.lineTo(w * 0.42, -h * 0.26);
+            ctx.lineTo(-w * 0.42, -h * 0.26);
             ctx.closePath();
             ctx.fill();
-            ctx.fillStyle = v.cabinColor;
-            ctx.fillRect(w * 0.14, -h * 0.96, w * 0.24, h * 0.34);
-        } else if (v.style === "rocket") {
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(-w * 0.48, -h * 0.34, w * 0.96, h * 0.22);
-            ctx.fillStyle = "#0284c7";
+
+            // Upper Deck & Operator Cab
+            ctx.fillStyle = "#eab308";
+            ctx.fillRect(w * 0.06, -h * 1.02, w * 0.36, h * 0.44);
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(w * 0.16, -h * 0.96, w * 0.22, h * 0.30);
+            ctx.fillStyle = "rgba(186, 230, 253, 0.5)";
+            ctx.fillRect(w * 0.18, -h * 0.93, w * 0.07, h * 0.24);
+
+            // Front Diagonal Access Ladder & Handrails
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 1.6;
             ctx.beginPath();
-            ctx.roundRect(w * 0.24, -h * 0.85, w * 0.24, h * 0.65, 5);
+            ctx.moveTo(w * 0.06, -h * 0.58);
+            ctx.lineTo(w * 0.42, -h * 0.58);
+            ctx.moveTo(w * 0.38, -h * 0.58);
+            ctx.lineTo(w * 0.24, -h * 0.18);
+            ctx.stroke();
+        } else if (v.style === "rocket") {
+            // Heavy Lowboy Flatbed Trailer
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(-w * 0.49, -h * 0.32, w * 0.74, h * 0.16);
+            ctx.fillStyle = "#475569";
+            ctx.fillRect(-w * 0.42, -h * 0.44, 6, h * 0.14);
+            ctx.fillRect(w * 0.10, -h * 0.44, 6, h * 0.14);
+
+            // Aero Semi Tractor Cab
+            const cabGrad = ctx.createLinearGradient(0, -h * 0.92, 0, -h * 0.20);
+            cabGrad.addColorStop(0, "#38bdf8");
+            cabGrad.addColorStop(1, "#0369a1");
+            ctx.fillStyle = cabGrad;
+            ctx.beginPath();
+            ctx.roundRect(w * 0.23, -h * 0.88, w * 0.25, h * 0.68, [6, 8, 2, 2]);
             ctx.fill();
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.roundRect(w * 0.33, -h * 0.80, w * 0.13, h * 0.30, 3);
+            ctx.fill();
+
+            // SpaceX-Style Falcon Booster & Payload Fairing
             ctx.fillStyle = "#f8fafc";
             ctx.beginPath();
-            ctx.roundRect(-w * 0.46, -h * 0.82, w * 0.66, h * 0.44, 6);
+            ctx.roundRect(-w * 0.46, -h * 0.80, w * 0.64, h * 0.40, 4);
             ctx.fill();
-            ctx.fillStyle = "#38bdf8";
+            // Black Interstage & Landing Legs
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(w * 0.02, -h * 0.80, w * 0.08, h * 0.40);
             ctx.beginPath();
-            ctx.moveTo(w * 0.20, -h * 0.82);
-            ctx.quadraticCurveTo(w * 0.46, -h * 0.60, w * 0.20, -h * 0.38);
+            ctx.moveTo(-w * 0.46, -h * 0.80);
+            ctx.lineTo(-w * 0.30, -h * 0.86);
+            ctx.lineTo(-w * 0.30, -h * 0.80);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.46, -h * 0.40);
+            ctx.lineTo(-w * 0.30, -h * 0.34);
+            ctx.lineTo(-w * 0.30, -h * 0.40);
+            ctx.closePath();
+            ctx.fill();
+            // Nose Fairing Cone
+            ctx.fillStyle = "#e2e8f0";
+            ctx.beginPath();
+            ctx.moveTo(w * 0.18, -h * 0.82);
+            ctx.quadraticCurveTo(w * 0.46, -h * 0.60, w * 0.18, -h * 0.38);
+            ctx.closePath();
+            ctx.fill();
+        } else if (v.style === "bus") {
+            // Modern Touring Coach Bus
+            const busGrad = ctx.createLinearGradient(0, -h * 0.96, 0, -h * 0.16);
+            busGrad.addColorStop(0, "#60a5fa");
+            busGrad.addColorStop(1, "#1d4ed8");
+            ctx.fillStyle = busGrad;
+            ctx.beginPath();
+            ctx.roundRect(-w * 0.48, -h * 0.94, w * 0.96, h * 0.78, [7, 9, 3, 3]);
+            ctx.fill();
+
+            // Tinted Panoramic Passenger Windows
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.roundRect(-w * 0.42, -h * 0.84, w * 0.85, h * 0.34, 4);
+            ctx.fill();
+            ctx.strokeStyle = "#3b82f6";
+            ctx.lineWidth = 1.5;
+            for (let pWin = -0.25; pWin <= 0.30; pWin += 0.14) {
+                ctx.beginPath();
+                ctx.moveTo(w * pWin, -h * 0.84);
+                ctx.lineTo(w * pWin, -h * 0.50);
+                ctx.stroke();
+            }
+            // Lower Luggage Bay Trim & Headlight
+            ctx.fillStyle = "#1e3a8a";
+            ctx.fillRect(-w * 0.36, -h * 0.42, w * 0.72, h * 0.20);
+            ctx.fillStyle = "#fef08a";
+            ctx.fillRect(w * 0.45, -h * 0.36, 3, 5);
+        } else if (v.style === "monster") {
+            // Lifted Suspension Struts & Roll Cage
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.30, 0); ctx.lineTo(-w * 0.22, -h * 0.45);
+            ctx.moveTo(w * 0.30, 0); ctx.lineTo(w * 0.22, -h * 0.45);
+            ctx.stroke();
+
+            // Sculpted Trophy Truck Body
+            const mGrad = ctx.createLinearGradient(0, -h * 0.95, 0, -h * 0.35);
+            mGrad.addColorStop(0, "#f472b6");
+            mGrad.addColorStop(1, "#be185d");
+            ctx.fillStyle = mGrad;
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.46, -h * 0.42);
+            ctx.lineTo(-w * 0.44, -h * 0.74);
+            ctx.lineTo(-w * 0.16, -h * 0.96);
+            ctx.lineTo(w * 0.20, -h * 0.96);
+            ctx.lineTo(w * 0.46, -h * 0.66);
+            ctx.lineTo(w * 0.46, -h * 0.42);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.12, -h * 0.90);
+            ctx.lineTo(w * 0.16, -h * 0.90);
+            ctx.lineTo(w * 0.28, -h * 0.68);
+            ctx.lineTo(-w * 0.12, -h * 0.68);
             ctx.closePath();
             ctx.fill();
         } else {
-            ctx.fillStyle = v.color;
+            // Sleek Fastback EV Sedan
+            const evGrad = ctx.createLinearGradient(0, -h * 0.92, 0, -h * 0.18);
+            evGrad.addColorStop(0, "#34d399");
+            evGrad.addColorStop(1, "#059669");
+            ctx.fillStyle = evGrad;
             ctx.beginPath();
-            ctx.roundRect(-w * 0.48, -h * 0.86, w * 0.96, h * 0.72, 6);
+            ctx.moveTo(-w * 0.47, -h * 0.20);
+            ctx.lineTo(-w * 0.45, -h * 0.56);
+            ctx.quadraticCurveTo(-w * 0.22, -h * 0.92, w * 0.08, -h * 0.90);
+            ctx.lineTo(w * 0.34, -h * 0.58);
+            ctx.lineTo(w * 0.48, -h * 0.48);
+            ctx.lineTo(w * 0.47, -h * 0.20);
+            ctx.closePath();
             ctx.fill();
-            ctx.fillStyle = v.cabinColor;
+
+            // Tinted Glass Canopy
+            ctx.fillStyle = "#0f172a";
             ctx.beginPath();
-            ctx.roundRect(-w * 0.18, -h * 0.78, w * 0.52, h * 0.34, 4);
+            ctx.moveTo(-w * 0.24, -h * 0.58);
+            ctx.quadraticCurveTo(-w * 0.06, -h * 0.84, w * 0.10, -h * 0.82);
+            ctx.lineTo(w * 0.28, -h * 0.58);
+            ctx.closePath();
             ctx.fill();
+
+            // LED Headlight & Taillight
+            ctx.fillStyle = "#fef08a";
+            ctx.fillRect(w * 0.43, -h * 0.44, 4, 4);
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(-w * 0.47, -h * 0.48, 3, 5);
         }
 
+        // High-Detail Wheels with Tire Tread, Alloy Rim & Spinning Spokes
         const wheelOffsets = v.style === "articulated"
-            ? [-w * 0.38, -w * 0.14, w * 0.34]
-            : [-w * 0.32, w * 0.32];
+            ? [-w * 0.36, -w * 0.13, w * 0.35]
+            : v.style === "rocket"
+                ? [-w * 0.38, -w * 0.24, w * 0.16, w * 0.38]
+                : [-w * 0.31, w * 0.31];
 
         wheelOffsets.forEach(wx => {
             ctx.save();
             ctx.translate(wx, 0);
             ctx.rotate(v.wheelSpin);
-            ctx.fillStyle = "#0f172a";
+            ctx.fillStyle = "#090d16";
             ctx.beginPath();
             ctx.arc(0, 0, wheelR, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = "#cbd5e1";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-wheelR * 0.55, 0);
-            ctx.lineTo(wheelR * 0.55, 0);
+            ctx.strokeStyle = "#334155";
+            ctx.lineWidth = 1.6;
             ctx.stroke();
+
+            // Alloy Rim
+            ctx.fillStyle = "#94a3b8";
+            ctx.beginPath();
+            ctx.arc(0, 0, wheelR * 0.48, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cross Spokes + Hub
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.moveTo(-wheelR * 0.42, 0); ctx.lineTo(wheelR * 0.42, 0);
+            ctx.moveTo(0, -wheelR * 0.42); ctx.lineTo(0, wheelR * 0.42);
+            ctx.stroke();
+
+            ctx.fillStyle = "#f8fafc";
+            ctx.beginPath();
+            ctx.arc(0, 0, wheelR * 0.16, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         });
 
@@ -3728,16 +3947,62 @@
 
     function buildLevelThumbnailSVG(lvl) {
         const theme = BIOME_THEMES[lvl.biome] || BIOME_THEMES.desert;
-        const lY = 24 + lvl.leftY * 5;
-        const rY = 24 + lvl.rightY * 5;
-        return `<svg viewBox="0 0 180 46" width="100%" height="100%" preserveAspectRatio="none">
-            <rect width="180" height="46" fill="${theme.skyTop}"/>
-            <rect x="44" y="36" width="92" height="10" fill="${theme.waterTop}"/>
-            <polygon points="0,46 0,${lY} 44,${lY} 44,46" fill="${theme.cliffFront}"/>
-            <polygon points="136,46 136,${rY} 180,${rY} 180,46" fill="${theme.cliffFront}"/>
-            ${lvl.hasCenterPier ? `<rect x="87" y="28" width="6" height="18" fill="${theme.cliffSide}"/>` : ""}
-            <line x1="44" y1="${lY}" x2="136" y2="${rY}" stroke="#cbd5e1" stroke-width="2.5"/>
-            <path d="M44,${lY} Q90,${Math.min(lY, rY) - 10} 136,${rY}" fill="none" stroke="#38bdf8" stroke-width="1.6"/>
+        const lY = 34 + lvl.leftY * 6.5;
+        const rY = 34 + lvl.rightY * 6.5;
+        const midY = Math.min(lY, rY) - 12;
+        const gradId = `tGrad_${lvl.id}`;
+
+        let landmarkSvg = "";
+        if (lvl.biome === "desert") {
+            landmarkSvg = `<g stroke="#4b5563" stroke-width="1.2" fill="none">
+                <path d="M18,${lY} L22,${lY - 14} L26,${lY}"/>
+                <circle cx="22" cy="${lY - 14}" r="4.5"/>
+            </g>`;
+        } else if (lvl.biome === "alpine") {
+            landmarkSvg = `<polygon points="158,${rY} 164,${rY - 16} 170,${rY}" fill="#064e3b"/>
+                <polygon points="161,${rY - 10} 164,${rY - 16} 167,${rY - 10}" fill="#f8fafc"/>`;
+        } else if (lvl.biome === "harbor") {
+            landmarkSvg = `<rect x="158" y="${rY - 16}" width="5" height="16" fill="#f8fafc"/>
+                <rect x="158" y="${rY - 11}" width="5" height="4" fill="#ef4444"/>
+                <circle cx="160.5" cy="${rY - 17}" r="2.2" fill="#fbbf24"/>
+                <path d="M84,48 L96,48 L94,52 L86,52 Z" fill="#dc2626"/>
+                <line x1="90" y1="48" x2="90" y2="31" stroke="#f8fafc" stroke-width="1.3"/>
+                <polygon points="90,32 97,46 90,46" fill="rgba(248,250,252,0.85)"/>`;
+        } else if (lvl.biome === "volcanic") {
+            landmarkSvg = `<polygon points="10,28 28,12 46,28" fill="#1c1917"/>
+                <circle cx="28" cy="11" r="2.5" fill="#fb923c"/>`;
+        } else if (lvl.biome === "jungle") {
+            landmarkSvg = `<path d="M22,${lY} Q24,${lY - 8} 22,${lY - 14}" stroke="#78350f" stroke-width="1.6" fill="none"/>
+                <ellipse cx="22" cy="${lY - 14}" rx="7" ry="2.2" fill="#15803d"/>`;
+        } else if (lvl.biome === "spaceport") {
+            landmarkSvg = `<rect x="158" y="${rY - 19}" width="6" height="19" fill="none" stroke="#38bdf8" stroke-width="1.1"/>
+                <circle cx="161" cy="${rY - 21}" r="2" fill="#ef4444"/>
+                <circle cx="65" cy="10" r="1" fill="#fff"/><circle cx="115" cy="14" r="1" fill="#fff"/>`;
+        }
+
+        return `<svg viewBox="0 0 180 62" width="100%" height="100%" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="${theme.skyTop}"/>
+                    <stop offset="100%" stop-color="${theme.skyBottom}"/>
+                </linearGradient>
+            </defs>
+            <rect width="180" height="62" fill="url(#${gradId})"/>
+            <polygon points="0,${lY} 28,${lY - 8} 44,${lY}" fill="${theme.farHill}"/>
+            <polygon points="136,${rY} 156,${rY - 9} 180,${rY}" fill="${theme.farHill}"/>
+            <rect x="44" y="48" width="92" height="14" fill="${theme.waterTop}"/>
+            <polygon points="44,48 64,62 84,48 104,62 124,48 136,56 136,48" fill="${theme.waterTri1}"/>
+            <polygon points="0,62 0,${lY} 44,${lY} 44,62" fill="${theme.cliffFront}"/>
+            <rect x="0" y="${lY - 2}" width="44" height="3" fill="${theme.plateauTop}"/>
+            <polygon points="136,62 136,${rY} 180,${rY} 180,62" fill="${theme.cliffFront}"/>
+            <rect x="136" y="${rY - 2}" width="44" height="3" fill="${theme.plateauTop}"/>
+            ${lvl.hasCenterPier ? `<polygon points="94,38 100,38 103,62 91,62" fill="${theme.cliffSide}"/>` : ""}
+            ${landmarkSvg}
+            <line x1="44" y1="${lY}" x2="136" y2="${rY}" stroke="#f8fafc" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M44,${lY} Q90,${midY} 136,${rY}" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="28" y="${lY - 7}" width="11" height="5" rx="1.5" fill="#fbbf24"/>
+            <circle cx="31" cy="${lY - 2}" r="1.5" fill="#0f172a"/>
+            <circle cx="36" cy="${lY - 2}" r="1.5" fill="#0f172a"/>
         </svg>`;
     }
 
